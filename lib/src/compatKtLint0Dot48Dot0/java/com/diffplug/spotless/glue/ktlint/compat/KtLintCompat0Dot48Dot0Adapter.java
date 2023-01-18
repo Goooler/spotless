@@ -141,7 +141,12 @@ public class KtLintCompat0Dot48Dot0Adapter implements KtLintCompatAdapter {
 						if (parts.length == 1) {
 							// convert ktlint_{ruleset} to {ruleset}
 							String qualifiedRuleId = parts[0];
-							property = RuleExecutionEditorConfigPropertyKt.createRuleSetExecutionEditorConfigProperty(qualifiedRuleId);
+							// Ktlint 0.48.0 officially supports standard & experimental ruleset only.
+							if ("standard".equals(qualifiedRuleId) || "experimental".equals(qualifiedRuleId)) {
+								property = RuleExecutionEditorConfigPropertyKt.createRuleSetExecutionEditorConfigProperty(qualifiedRuleId);
+							} else {
+								return null;
+							}
 						} else {
 							// convert ktlint_{ruleset}_{rulename} to {ruleset}:{rulename}
 							String qualifiedRuleId = parts[0] + ":" + parts[1];
