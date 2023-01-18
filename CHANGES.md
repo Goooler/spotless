@@ -14,6 +14,7 @@ We adhere to the [keepachangelog](https://keepachangelog.com/en/1.0.0/) format (
 * `ProcessRunner` has added some convenience methods so it can be used for maven testing. ([#1496](https://github.com/diffplug/spotless/pull/1496))
 ### Fixed
 * The default list of type annotations used by `formatAnnotations` has had 8 more annotations from the Checker Framework added [#1494](https://github.com/diffplug/spotless/pull/1494)
+* Generate the correct qualifiedRuleId for Ktlint 0.48.x [#1495](https://github.com/diffplug/spotless/pull/1495)
 ### Changes
 
 ## [2.32.0] - 2023-01-13
