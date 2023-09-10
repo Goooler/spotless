@@ -18,7 +18,9 @@ package com.diffplug.spotless.kotlin;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
@@ -110,8 +112,14 @@ public class KtLintStep {
 			this.version = version;
 			this.userData = new TreeMap<>(userData);
 			this.editorConfigOverride = new TreeMap<>(editorConfigOverride);
-			this.jarState = JarState.from((version.startsWith("0.") ? MAVEN_COORDINATE_0_DOT : MAVEN_COORDINATE_1_DOT) + version,
-					provisioner);
+			List<String> mavenCoordinates = new ArrayList<>();
+			if (version.startsWith("0.")) {
+				mavenCoordinates.add(MAVEN_COORDINATE_0_DOT + version);
+			} else {
+				mavenCoordinates.add(MAVEN_COORDINATE_1_DOT + version);
+				mavenCoordinates.add("io.github.oshai:kotlin-logging-jvm:5.1.0");
+			}
+			this.jarState = JarState.from(mavenCoordinates, provisioner);
 			this.editorConfigPath = editorConfigPath;
 			this.isScript = isScript;
 		}
