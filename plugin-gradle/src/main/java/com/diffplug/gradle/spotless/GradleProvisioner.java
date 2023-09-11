@@ -26,7 +26,6 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
-import org.gradle.api.attributes.Bundling;
 import org.gradle.api.initialization.dsl.ScriptHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,9 +119,6 @@ class GradleProvisioner {
 				config.setTransitive(withTransitives);
 				config.setCanBeConsumed(false);
 				config.setVisible(false);
-				config.attributes(attr -> {
-					attr.attribute(Bundling.BUNDLING_ATTRIBUTE, project.getObjects().named(Bundling.class, Bundling.EXTERNAL));
-				});
 				return config.resolve();
 			} catch (Exception e) {
 				String projName = project.getPath().substring(1).replace(':', '/');
