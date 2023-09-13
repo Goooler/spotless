@@ -27,3 +27,22 @@ spotless {
 		endWithNewline()
 	}
 }
+
+configurations.create("spotlessDeps") {
+	canBeConsumed = false
+	transitive = true
+	visible = false
+	attributes { attr ->
+		attr.attribute(Bundling.BUNDLING_ATTRIBUTE, project.getObjects().named(Bundling.class, Bundling.EXTERNAL))
+	}
+}
+
+dependencies {
+	spotlessDeps "com.pinterest.ktlint:ktlint-cli:1.0.0"
+}
+
+tasks.register("spotlessDeps") {
+	configurations.spotlessDeps.resolve().forEach {
+		println "Resolved: ${it.name}"
+	}
+}
