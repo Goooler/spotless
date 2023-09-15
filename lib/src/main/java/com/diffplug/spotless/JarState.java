@@ -70,7 +70,6 @@ public final class JarState implements Serializable {
 		if (jars.isEmpty()) {
 			throw new NoSuchElementException("Resolved to an empty result: " + mavenCoordinates.stream().collect(Collectors.joining(", ")));
 		}
-		jars.forEach(file -> System.out.println("Resolved: " + file.getName()));
 		FileSignature fileSignature = FileSignature.signAsSet(jars);
 		return new JarState(mavenCoordinates, fileSignature);
 	}
