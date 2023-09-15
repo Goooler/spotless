@@ -121,7 +121,7 @@ class GradleProvisioner {
 				config.setCanBeConsumed(false);
 				config.setVisible(false);
 				config.attributes(attr -> {
-					attr.attribute(Bundling.BUNDLING_ATTRIBUTE, project.getObjects().named(Bundling.class, Bundling.EXTERNAL));
+					attr.attribute(Bundling.BUNDLING_ATTRIBUTE, project.getObjects().named(Bundling.class, Bundling.SHADOWED));
 				});
 				return config.resolve();
 			} catch (Exception e) {
