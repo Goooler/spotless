@@ -80,18 +80,18 @@ class KtLintStepTest extends ResourceHarness {
 		StepHarnessWithFile.forStep(this, step)
 				.testResource("kotlin/ktlint/basic.dirty", "kotlin/ktlint/basic.clean")
 				.testResourceExceptionMsg("kotlin/ktlint/unsolvable.dirty").isEqualTo("Error on line: 1, column: 1\n" +
-						"rule: standard:no-wildcard-imports\n" +
-						"Wildcard import");
+						"rule: standard:no-empty-file\n" +
+						"File 'unsolvable.dirty' should not be empty");
 	}
 
 	@Test
 	void behavior() {
-		FormatterStep step = KtLintStep.create(TestProvisioner.mavenCentral());
+		FormatterStep step = KtLintStep.create("1.0.0", TestProvisioner.mavenCentral());
 		StepHarnessWithFile.forStep(this, step)
 				.testResource("kotlin/ktlint/basic.dirty", "kotlin/ktlint/basic.clean")
 				.testResourceExceptionMsg("kotlin/ktlint/unsolvable.dirty").isEqualTo("Error on line: 1, column: 1\n" +
-						"rule: standard:no-wildcard-imports\n" +
-						"Wildcard import");
+						"rule: standard:no-empty-file\n" +
+						"File 'unsolvable.dirty' should not be empty");
 	}
 
 	@Test
