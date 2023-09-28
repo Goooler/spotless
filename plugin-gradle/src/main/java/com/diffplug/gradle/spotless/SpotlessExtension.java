@@ -205,6 +205,12 @@ public abstract class SpotlessExtension {
 		format(ProtobufExtension.NAME, ProtobufExtension.class, closure);
 	}
 
+	/** Configures the special XML-specific extension. */
+	public void xml(Action<XmlExtension> closure) {
+		requireNonNull(closure);
+		format(XmlExtension.NAME, XmlExtension.class, closure);
+	}
+
 	/** Configures the special YAML-specific extension. */
 	public void yaml(Action<YamlExtension> closure) {
 		requireNonNull(closure);
