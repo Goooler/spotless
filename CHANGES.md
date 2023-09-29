@@ -12,6 +12,8 @@ We adhere to the [keepachangelog](https://keepachangelog.com/en/1.0.0/) format (
 ## [Unreleased]
 ###
 * Bump palantir-java-format to 2.38.0 ([#1822](https://github.com/diffplug/spotless/pull/1822))
+### Added
+* Add Java 21 to CI ([#1822](https://github.com/diffplug/spotless/pull/1822))
 
 ## [2.43.0] - 2023-11-27
 ### Added
