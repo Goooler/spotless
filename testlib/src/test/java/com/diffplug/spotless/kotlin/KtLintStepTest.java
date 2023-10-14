@@ -75,8 +75,8 @@ class KtLintStepTest extends ResourceHarness {
 	}
 
 	@Test
-	void works1_0_0() {
-		FormatterStep step = KtLintStep.create("1.0.0", TestProvisioner.mavenCentral());
+	void works1_0_1() {
+		FormatterStep step = KtLintStep.create("1.0.1", TestProvisioner.mavenCentral());
 		StepHarnessWithFile.forStep(this, step)
 				.testResource("kotlin/ktlint/basic.dirty", "kotlin/ktlint/basic.clean")
 				.testResourceExceptionMsg("kotlin/ktlint/unsolvable.dirty").isEqualTo("Error on line: 1, column: 1\n" +

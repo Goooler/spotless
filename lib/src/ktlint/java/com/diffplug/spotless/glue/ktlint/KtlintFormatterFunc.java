@@ -37,7 +37,7 @@ public class KtlintFormatterFunc implements FormatterFunc.NeedsFile {
 		int majorVersion = Integer.parseInt(versions[0]);
 		int minorVersion = Integer.parseInt(versions[1]);
 		if (majorVersion == 1) {
-			this.adapter = new KtLintCompat1Dot0Dot0Adapter();
+			this.adapter = new KtLintCompat1Dot0Dot1Adapter();
 		} else {
 			if (minorVersion >= 50) {
 				// Fixed `RuleId` and `RuleSetId` issues

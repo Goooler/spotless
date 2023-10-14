@@ -53,9 +53,9 @@ import kotlin.Pair;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function2;
 
-public class KtLintCompat1Dot0Dot0Adapter implements KtLintCompatAdapter {
+public class KtLintCompat1Dot0Dot1Adapter implements KtLintCompatAdapter {
 
-	private static final Logger logger = LoggerFactory.getLogger(KtLintCompat1Dot0Dot0Adapter.class);
+	private static final Logger logger = LoggerFactory.getLogger(KtLintCompat1Dot0Dot1Adapter.class);
 
 	private static final List<EditorConfigProperty<?>> DEFAULT_EDITOR_CONFIG_PROPERTIES;
 

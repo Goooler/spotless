@@ -29,10 +29,10 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-public class KtLintCompat1Dot0Dot0AdapterTest {
+public class KtLintCompat1Dot0Dot1AdapterTest {
 	@Test
 	public void testDefaults(@TempDir Path path) throws IOException {
-		KtLintCompat1Dot0Dot0Adapter KtLintCompat1Dot0Dot0Adapter = new KtLintCompat1Dot0Dot0Adapter();
+		KtLintCompat1Dot0Dot1Adapter KtLintCompat1Dot0Dot1Adapter = new KtLintCompat1Dot0Dot1Adapter();
 		String text = loadAndWriteText(path, "EmptyClassBody.kt");
 		final Path filePath = Paths.get(path.toString(), "EmptyClassBody.kt");
 
@@ -40,13 +40,13 @@ public class KtLintCompat1Dot0Dot0AdapterTest {
 
 		Map<String, Object> editorConfigOverrideMap = new HashMap<>();
 
-		String formatted = KtLintCompat1Dot0Dot0Adapter.format(text, filePath, false, null, userData, editorConfigOverrideMap);
+		String formatted = KtLintCompat1Dot0Dot1Adapter.format(text, filePath, false, null, userData, editorConfigOverrideMap);
 		assertEquals("class EmptyClassBody\n", formatted);
 	}
 
 	@Test
 	public void testEditorConfigCanDisable(@TempDir Path path) throws IOException {
-		KtLintCompat1Dot0Dot0Adapter KtLintCompat1Dot0Dot0Adapter = new KtLintCompat1Dot0Dot0Adapter();
+		KtLintCompat1Dot0Dot1Adapter KtLintCompat1Dot0Dot1Adapter = new KtLintCompat1Dot0Dot1Adapter();
 		String text = loadAndWriteText(path, "FailsNoSemicolons.kt");
 		final Path filePath = Paths.get(path.toString(), "FailsNoSemicolons.kt");
 
@@ -56,12 +56,12 @@ public class KtLintCompat1Dot0Dot0AdapterTest {
 		editorConfigOverrideMap.put("indent_style", "tab");
 		editorConfigOverrideMap.put("ktlint_standard_no-semi", "disabled");
 
-		String formatted = KtLintCompat1Dot0Dot0Adapter.format(text, filePath, false, null, userData, editorConfigOverrideMap);
+		String formatted = KtLintCompat1Dot0Dot1Adapter.format(text, filePath, false, null, userData, editorConfigOverrideMap);
 		assertEquals("class FailsNoSemicolons {\n\tval i = 0;\n}\n", formatted);
 	}
 
 	private static String loadAndWriteText(Path path, String name) throws IOException {
-		try (InputStream is = KtLintCompat1Dot0Dot0AdapterTest.class.getResourceAsStream("/" + name)) {
+		try (InputStream is = KtLintCompat1Dot0Dot1AdapterTest.class.getResourceAsStream("/" + name)) {
 			Files.copy(is, path.resolve(name));
 		}
 		return new String(Files.readAllBytes(path.resolve(name)), StandardCharsets.UTF_8);
