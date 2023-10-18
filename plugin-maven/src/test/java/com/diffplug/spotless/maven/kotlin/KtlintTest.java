@@ -48,9 +48,11 @@ class KtlintTest extends MavenIntegrationHarness {
 	@Test
 	void testReadCodeStyleFromEditorConfigFile() throws Exception {
 		setFile(".editorconfig").toResource("kotlin/ktlint/ktlint_official/.editorconfig");
-		setFile("src/main/kotlin/Main.kt").toResource("kotlin/ktlint/experimentalEditorConfigOverride.dirty");
+		writePomWithKotlinSteps("<ktlint/>");
+		String path = "src/main/kotlin/Main.kt";
+		setFile(path).toResource("kotlin/ktlint/experimentalEditorConfigOverride.dirty");
 		mavenRunner().withArguments("spotless:apply").runNoError();
-		assertFile("src/main/kotlin/Main.kt").sameAsResource("kotlin/ktlint/experimentalEditorConfigOverride.ktlintOfficial.clean");
+		assertFile(path).sameAsResource("kotlin/ktlint/experimentalEditorConfigOverride.ktlintOfficial.clean");
 	}
 
 	@Test
@@ -61,7 +63,9 @@ class KtlintTest extends MavenIntegrationHarness {
 				"    <ktlint_code_style>ktlint_official</ktlint_code_style>\n" +
 				"  </editorConfigOverride>\n" +
 				"</ktlint>");
-		setFile("src/main/kotlin/Main.kt").toResource("kotlin/ktlint/experimentalEditorConfigOverride.dirty");
-		assertFile("src/main/kotlin/Main.kt").sameAsResource("kotlin/ktlint/experimentalEditorConfigOverride.ktlintOfficial.clean");
+		String path = "src/main/kotlin/Main.kt";
+		setFile(path).toResource("kotlin/ktlint/experimentalEditorConfigOverride.dirty");
+		mavenRunner().withArguments("spotless:apply").runNoError();
+		assertFile(path).sameAsResource("kotlin/ktlint/experimentalEditorConfigOverride.ktlintOfficial.clean");
 	}
 }
