@@ -46,7 +46,7 @@ class KtlintTest extends MavenIntegrationHarness {
 	}
 
 	@Test
-	void testCanUseCodeStyleFromEditorConfigFile() throws Exception {
+	void testReadCodeStyleFromEditorConfigFile() throws Exception {
 		setFile(".editorconfig").toResource("kotlin/ktlint/ktlint_official/.editorconfig");
 		setFile("src/main/kotlin/Main.kt").toResource("kotlin/ktlint/experimentalEditorConfigOverride.dirty");
 		mavenRunner().withArguments("spotless:apply").runNoError();

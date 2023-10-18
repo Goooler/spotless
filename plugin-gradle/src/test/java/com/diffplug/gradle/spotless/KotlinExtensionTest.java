@@ -106,7 +106,7 @@ class KotlinExtensionTest extends GradleIntegrationHarness {
 	}
 
 	@Test
-	void testCanUseCodeStyleFromEditorConfigFile() throws IOException {
+	void testReadCodeStyleFromEditorConfigFile() throws IOException {
 		setFile(".editorconfig").toResource("kotlin/ktlint/ktlint_official/.editorconfig");
 		setFile("build.gradle").toLines(
 				"plugins {",
