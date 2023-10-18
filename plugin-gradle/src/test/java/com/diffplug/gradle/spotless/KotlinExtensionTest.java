@@ -119,7 +119,7 @@ class KotlinExtensionTest extends GradleIntegrationHarness {
 				"        ktlint()",
 				"    }",
 				"}");
-		testReadCodeStyleCommon();
+		checkKtlintOfficialStyle();
 	}
 
 	@Test
@@ -138,7 +138,7 @@ class KotlinExtensionTest extends GradleIntegrationHarness {
 				"        ])",
 				"    }",
 				"}");
-		testReadCodeStyleCommon();
+		checkKtlintOfficialStyle();
 	}
 
 	@Test
@@ -181,7 +181,7 @@ class KotlinExtensionTest extends GradleIntegrationHarness {
 		assertFile("src/main/kotlin/max-width.kt").sameAsResource("kotlin/ktfmt/max-width.clean");
 	}
 
-	private void testReadCodeStyleCommon() throws IOException {
+	private void checkKtlintOfficialStyle() throws IOException {
 		String path = "src/main/kotlin/Main.kt";
 		setFile(path).toResource("kotlin/ktlint/experimentalEditorConfigOverride.dirty");
 		gradleRunner().withArguments("spotlessApply").build();

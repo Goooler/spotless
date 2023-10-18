@@ -49,7 +49,7 @@ class KtlintTest extends MavenIntegrationHarness {
 	void testReadCodeStyleFromEditorConfigFile() throws Exception {
 		setFile(".editorconfig").toResource("kotlin/ktlint/ktlint_official/.editorconfig");
 		writePomWithKotlinSteps("<ktlint/>");
-		testReadCodeStyleCommon();
+		checkKtlintOfficialStyle();
 	}
 
 	@Test
@@ -60,10 +60,10 @@ class KtlintTest extends MavenIntegrationHarness {
 				"    <ktlint_code_style>ktlint_official</ktlint_code_style>\n" +
 				"  </editorConfigOverride>\n" +
 				"</ktlint>");
-		testReadCodeStyleCommon();
+		checkKtlintOfficialStyle();
 	}
 
-	private void testReadCodeStyleCommon() throws Exception {
+	private void checkKtlintOfficialStyle() throws Exception {
 		String path = "src/main/kotlin/Main.kt";
 		setFile(path).toResource("kotlin/ktlint/experimentalEditorConfigOverride.dirty");
 		mavenRunner().withArguments("spotless:apply").runNoError();
