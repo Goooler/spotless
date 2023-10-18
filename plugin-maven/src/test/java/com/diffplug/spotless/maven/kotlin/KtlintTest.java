@@ -19,8 +19,6 @@ import org.junit.jupiter.api.Test;
 
 import com.diffplug.spotless.maven.MavenIntegrationHarness;
 
-import java.io.IOException;
-
 class KtlintTest extends MavenIntegrationHarness {
 	@Test
 	void testKtlint() throws Exception {
@@ -59,10 +57,10 @@ class KtlintTest extends MavenIntegrationHarness {
 	void testSetEditorConfigCanOverrideEditorConfigFile() throws Exception {
 		setFile(".editorconfig").toResource("kotlin/ktlint/intellij_idea/.editorconfig");
 		writePomWithKotlinSteps("<ktlint>\n" +
-			"  <editorConfigOverride>\n" +
-			"    <ktlint_code_style>ktlint_official</ktlint_code_style>\n" +
-			"  </editorConfigOverride>\n" +
-			"</ktlint>");
+				"  <editorConfigOverride>\n" +
+				"    <ktlint_code_style>ktlint_official</ktlint_code_style>\n" +
+				"  </editorConfigOverride>\n" +
+				"</ktlint>");
 		setFile("src/main/kotlin/Main.kt").toResource("kotlin/ktlint/experimentalEditorConfigOverride.dirty");
 		assertFile("src/main/kotlin/Main.kt").sameAsResource("kotlin/ktlint/experimentalEditorConfigOverride.ktlintOfficial.clean");
 	}
