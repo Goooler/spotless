@@ -106,6 +106,25 @@ class KotlinExtensionTest extends GradleIntegrationHarness {
 	}
 
 	@Test
+	void testCanUseCodeStyleFromEditorConfigFile() throws IOException {
+		setFile(".editorconfig").toResource("kotlin/ktlint/ktlint_official/.editorconfig");
+		setFile("build.gradle").toLines(
+			"plugins {",
+			"    id 'org.jetbrains.kotlin.jvm' version '1.5.31'",
+			"    id 'com.diffplug.spotless'",
+			"}",
+			"repositories { mavenCentral() }",
+			"spotless {",
+			"    kotlin {",
+			"        ktlint()",
+			"    }",
+			"}");
+		setFile("src/main/kotlin/Main.kt").toResource("kotlin/ktlint/experimentalEditorConfigOverride.dirty");
+		gradleRunner().withArguments("spotlessApply").build();
+		assertFile("src/main/kotlin/Main.kt").sameAsResource("kotlin/ktlint/experimentalEditorConfigOverride.ktlintOfficial.clean");
+	}
+
+	@Test
 	void testSetEditorConfigCanOverrideEditorConfigFile() throws IOException {
 		setFile(".editorconfig").toResource("kotlin/ktlint/intellij_idea/.editorconfig");
 		setFile("build.gradle").toLines(
