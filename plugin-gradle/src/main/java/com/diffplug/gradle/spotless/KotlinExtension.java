@@ -21,7 +21,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
@@ -32,8 +31,6 @@ import com.diffplug.spotless.FormatterStep;
 import com.diffplug.spotless.kotlin.DiktatStep;
 import com.diffplug.spotless.kotlin.KtLintStep;
 import com.diffplug.spotless.kotlin.KtfmtStep;
-import com.diffplug.spotless.kotlin.KtfmtStep.KtfmtFormattingOptions;
-import com.diffplug.spotless.kotlin.KtfmtStep.Style;
 
 public class KotlinExtension extends BaseKotlinExtension implements HasBuiltinDelimiterForLicense, JvmLang {
 	static final String NAME = "kotlin";
@@ -77,55 +74,6 @@ public class KotlinExtension extends BaseKotlinExtension implements HasBuiltinDe
 	public KtfmtConfig ktfmt(String version) {
 		Objects.requireNonNull(version);
 		return new KtfmtConfig(version);
-	}
-
-	public class KtfmtConfig {
-		final String version;
-		Style style;
-		KtfmtFormattingOptions options;
-
-		private final ConfigurableStyle configurableStyle = new ConfigurableStyle();
-
-		KtfmtConfig(String version) {
-			this.version = Objects.requireNonNull(version);
-			addStep(createStep());
-		}
-
-		private ConfigurableStyle style(Style style) {
-			this.style = style;
-			replaceStep(createStep());
-			return configurableStyle;
-		}
-
-		public ConfigurableStyle dropboxStyle() {
-			return style(Style.DROPBOX);
-		}
-
-		public ConfigurableStyle googleStyle() {
-			return style(Style.GOOGLE);
-		}
-
-		public ConfigurableStyle kotlinlangStyle() {
-			return style(Style.KOTLINLANG);
-		}
-
-		public void configure(Consumer<KtfmtFormattingOptions> optionsConfiguration) {
-			this.configurableStyle.configure(optionsConfiguration);
-		}
-
-		private FormatterStep createStep() {
-			return KtfmtStep.create(version, provisioner(), style, options);
-		}
-
-		public class ConfigurableStyle {
-
-			public void configure(Consumer<KtfmtFormattingOptions> optionsConfiguration) {
-				KtfmtFormattingOptions ktfmtFormattingOptions = new KtfmtFormattingOptions();
-				optionsConfiguration.accept(ktfmtFormattingOptions);
-				options = ktfmtFormattingOptions;
-				replaceStep(createStep());
-			}
-		}
 	}
 
 	/** Adds the specified version of <a href="https://github.com/cqfn/diKTat">diktat</a>. */

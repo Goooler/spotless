@@ -18,6 +18,8 @@ package com.diffplug.gradle.spotless;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
@@ -25,10 +27,60 @@ import com.diffplug.common.collect.ImmutableSortedMap;
 import com.diffplug.spotless.FileSignature;
 import com.diffplug.spotless.FormatterStep;
 import com.diffplug.spotless.kotlin.KtLintStep;
+import com.diffplug.spotless.kotlin.KtfmtStep;
 
 public abstract class BaseKotlinExtension extends FormatExtension {
 	public BaseKotlinExtension(SpotlessExtension spotless) {
 		super(spotless);
+	}
+
+	public class KtfmtConfig {
+		final String version;
+		KtfmtStep.Style style;
+		KtfmtStep.KtfmtFormattingOptions options;
+
+		private final ConfigurableStyle configurableStyle = new ConfigurableStyle();
+
+		KtfmtConfig(String version) {
+			this.version = Objects.requireNonNull(version);
+			addStep(createStep());
+		}
+
+		private ConfigurableStyle style(KtfmtStep.Style style) {
+			this.style = style;
+			replaceStep(createStep());
+			return configurableStyle;
+		}
+
+		public ConfigurableStyle dropboxStyle() {
+			return style(KtfmtStep.Style.DROPBOX);
+		}
+
+		public ConfigurableStyle googleStyle() {
+			return style(KtfmtStep.Style.GOOGLE);
+		}
+
+		public ConfigurableStyle kotlinlangStyle() {
+			return style(KtfmtStep.Style.KOTLINLANG);
+		}
+
+		public void configure(Consumer<KtfmtStep.KtfmtFormattingOptions> optionsConfiguration) {
+			this.configurableStyle.configure(optionsConfiguration);
+		}
+
+		private FormatterStep createStep() {
+			return KtfmtStep.create(version, provisioner(), style, options);
+		}
+
+		public class ConfigurableStyle {
+
+			public void configure(Consumer<KtfmtStep.KtfmtFormattingOptions> optionsConfiguration) {
+				KtfmtStep.KtfmtFormattingOptions ktfmtFormattingOptions = new KtfmtStep.KtfmtFormattingOptions();
+				optionsConfiguration.accept(ktfmtFormattingOptions);
+				options = ktfmtFormattingOptions;
+				replaceStep(createStep());
+			}
+		}
 	}
 
 	public class KtlintConfig {
