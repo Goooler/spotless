@@ -23,7 +23,6 @@ import java.util.Objects;
 import javax.inject.Inject;
 
 import com.diffplug.spotless.FileSignature;
-import com.diffplug.spotless.FormatterStep;
 import com.diffplug.spotless.kotlin.DiktatStep;
 import com.diffplug.spotless.kotlin.KtLintStep;
 import com.diffplug.spotless.kotlin.KtfmtStep;
@@ -67,37 +66,11 @@ public class KotlinGradleExtension extends BaseKotlinExtension {
 	/** Adds the specified version of <a href="https://github.com/cqfn/diKTat">diktat</a>. */
 	public DiktatConfig diktat(String version) {
 		Objects.requireNonNull(version, "version");
-		return new DiktatConfig(version);
+		return new DiktatConfig(version, true);
 	}
 
 	public DiktatConfig diktat() {
 		return diktat(DiktatStep.defaultVersionDiktat());
-	}
-
-	public class DiktatConfig {
-
-		private final String version;
-		private FileSignature config;
-
-		DiktatConfig(String version) {
-			this.version = version;
-			addStep(createStep());
-		}
-
-		public DiktatConfig configFile(Object file) throws IOException {
-			// Specify the path to the configuration file
-			if (file == null) {
-				this.config = null;
-			} else {
-				this.config = FileSignature.signAsList(getProject().file(file));
-			}
-			replaceStep(createStep());
-			return this;
-		}
-
-		private FormatterStep createStep() {
-			return DiktatStep.createForScript(version, provisioner(), config);
-		}
 	}
 
 	@Override

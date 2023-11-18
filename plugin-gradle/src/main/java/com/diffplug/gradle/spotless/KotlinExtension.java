@@ -27,7 +27,6 @@ import javax.inject.Inject;
 import org.gradle.api.tasks.SourceSet;
 
 import com.diffplug.spotless.FileSignature;
-import com.diffplug.spotless.FormatterStep;
 import com.diffplug.spotless.kotlin.DiktatStep;
 import com.diffplug.spotless.kotlin.KtLintStep;
 import com.diffplug.spotless.kotlin.KtfmtStep;
@@ -79,37 +78,11 @@ public class KotlinExtension extends BaseKotlinExtension implements HasBuiltinDe
 	/** Adds the specified version of <a href="https://github.com/cqfn/diKTat">diktat</a>. */
 	public DiktatConfig diktat(String version) {
 		Objects.requireNonNull(version);
-		return new DiktatConfig(version);
+		return new DiktatConfig(version, false);
 	}
 
 	public DiktatConfig diktat() {
 		return diktat(DiktatStep.defaultVersionDiktat());
-	}
-
-	public class DiktatConfig {
-
-		private final String version;
-		private FileSignature config;
-
-		DiktatConfig(String version) {
-			this.version = version;
-			addStep(createStep());
-		}
-
-		public DiktatConfig configFile(Object file) throws IOException {
-			// Specify the path to the configuration file
-			if (file == null) {
-				this.config = null;
-			} else {
-				this.config = FileSignature.signAsList(getProject().file(file));
-			}
-			replaceStep(createStep());
-			return this;
-		}
-
-		private FormatterStep createStep() {
-			return DiktatStep.create(version, provisioner(), config);
-		}
 	}
 
 	/** If the user hasn't specified the files yet, we'll assume he/she means all of the kotlin files. */

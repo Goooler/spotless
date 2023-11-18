@@ -26,12 +26,41 @@ import javax.annotation.Nullable;
 import com.diffplug.common.collect.ImmutableSortedMap;
 import com.diffplug.spotless.FileSignature;
 import com.diffplug.spotless.FormatterStep;
+import com.diffplug.spotless.kotlin.DiktatStep;
 import com.diffplug.spotless.kotlin.KtLintStep;
 import com.diffplug.spotless.kotlin.KtfmtStep;
 
 public abstract class BaseKotlinExtension extends FormatExtension {
 	public BaseKotlinExtension(SpotlessExtension spotless) {
 		super(spotless);
+	}
+
+	public class DiktatConfig {
+
+		private final String version;
+		private final boolean isScript;
+		private FileSignature config;
+
+		DiktatConfig(String version, boolean isScript) {
+			this.version = version;
+			this.isScript = isScript;
+			addStep(createStep());
+		}
+
+		public DiktatConfig configFile(Object file) throws IOException {
+			// Specify the path to the configuration file
+			if (file == null) {
+				this.config = null;
+			} else {
+				this.config = FileSignature.signAsList(getProject().file(file));
+			}
+			replaceStep(createStep());
+			return this;
+		}
+
+		private FormatterStep createStep() {
+			return DiktatStep.create(version, provisioner(), isScript, config);
+		}
 	}
 
 	public class KtfmtConfig {
