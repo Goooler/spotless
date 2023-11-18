@@ -57,18 +57,18 @@ public class KotlinExtension extends FormatExtension implements HasBuiltinDelimi
 	}
 
 	/** Adds the specified version of <a href="https://github.com/pinterest/ktlint">ktlint</a>. */
-	public KtlintFormatExtension ktlint(String version) throws IOException {
+	public KtlintConfig ktlint(String version) throws IOException {
 		Objects.requireNonNull(version);
 		File defaultEditorConfig = getProject().getRootProject().file(".editorconfig");
 		FileSignature editorConfigPath = defaultEditorConfig.exists() ? FileSignature.signAsList(defaultEditorConfig) : null;
-		return new KtlintFormatExtension(version, editorConfigPath, Collections.emptyMap(), Collections.emptyMap());
+		return new KtlintConfig(version, editorConfigPath, Collections.emptyMap(), Collections.emptyMap());
 	}
 
-	public KtlintFormatExtension ktlint() throws IOException {
+	public KtlintConfig ktlint() throws IOException {
 		return ktlint(KtLintStep.defaultVersion());
 	}
 
-	public class KtlintFormatExtension {
+	public class KtlintConfig {
 
 		private final String version;
 		@Nullable
@@ -76,7 +76,7 @@ public class KotlinExtension extends FormatExtension implements HasBuiltinDelimi
 		private Map<String, String> userData;
 		private Map<String, Object> editorConfigOverride;
 
-		KtlintFormatExtension(String version, @Nullable FileSignature editorConfigPath, Map<String, String> config,
+		KtlintConfig(String version, @Nullable FileSignature editorConfigPath, Map<String, String> config,
 				Map<String, Object> editorConfigOverride) {
 			this.version = version;
 			this.editorConfigPath = editorConfigPath;
@@ -85,7 +85,7 @@ public class KotlinExtension extends FormatExtension implements HasBuiltinDelimi
 			addStep(createStep());
 		}
 
-		public KtlintFormatExtension setEditorConfigPath(Object editorConfigPath) throws IOException {
+		public KtlintConfig setEditorConfigPath(Object editorConfigPath) throws IOException {
 			if (editorConfigPath == null) {
 				this.editorConfigPath = null;
 			} else {
@@ -99,7 +99,7 @@ public class KotlinExtension extends FormatExtension implements HasBuiltinDelimi
 			return this;
 		}
 
-		public KtlintFormatExtension userData(Map<String, String> userData) {
+		public KtlintConfig userData(Map<String, String> userData) {
 			// Copy the map to a sorted map because up-to-date checking is based on binary-equals of the serialized
 			// representation.
 			this.userData = ImmutableSortedMap.copyOf(userData);
@@ -107,7 +107,7 @@ public class KotlinExtension extends FormatExtension implements HasBuiltinDelimi
 			return this;
 		}
 
-		public KtlintFormatExtension editorConfigOverride(Map<String, Object> editorConfigOverride) {
+		public KtlintConfig editorConfigOverride(Map<String, Object> editorConfigOverride) {
 			// Copy the map to a sorted map because up-to-date checking is based on binary-equals of the serialized
 			// representation.
 			this.editorConfigOverride = ImmutableSortedMap.copyOf(editorConfigOverride);
@@ -184,26 +184,26 @@ public class KotlinExtension extends FormatExtension implements HasBuiltinDelimi
 	}
 
 	/** Adds the specified version of <a href="https://github.com/cqfn/diKTat">diktat</a>. */
-	public DiktatFormatExtension diktat(String version) {
+	public DiktatConfig diktat(String version) {
 		Objects.requireNonNull(version);
-		return new DiktatFormatExtension(version);
+		return new DiktatConfig(version);
 	}
 
-	public DiktatFormatExtension diktat() {
+	public DiktatConfig diktat() {
 		return diktat(DiktatStep.defaultVersionDiktat());
 	}
 
-	public class DiktatFormatExtension {
+	public class DiktatConfig {
 
 		private final String version;
 		private FileSignature config;
 
-		DiktatFormatExtension(String version) {
+		DiktatConfig(String version) {
 			this.version = version;
 			addStep(createStep());
 		}
 
-		public DiktatFormatExtension configFile(Object file) throws IOException {
+		public DiktatConfig configFile(Object file) throws IOException {
 			// Specify the path to the configuration file
 			if (file == null) {
 				this.config = null;
