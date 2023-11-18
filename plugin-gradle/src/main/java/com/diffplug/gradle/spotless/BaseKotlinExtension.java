@@ -17,6 +17,7 @@ package com.diffplug.gradle.spotless;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -34,6 +35,39 @@ public abstract class BaseKotlinExtension extends FormatExtension {
 	public BaseKotlinExtension(SpotlessExtension spotless) {
 		super(spotless);
 	}
+
+	public DiktatConfig diktat() {
+		return diktat(DiktatStep.defaultVersionDiktat());
+	}
+
+	/** Adds the specified version of <a href="https://github.com/cqfn/diKTat">diktat</a>. */
+	public DiktatConfig diktat(String version) {
+		return new DiktatConfig(version, isScript());
+	}
+
+	public KtlintConfig ktlint() throws IOException {
+		return ktlint(KtLintStep.defaultVersion());
+	}
+
+	/** Adds the specified version of <a href="https://github.com/pinterest/ktlint">ktlint</a>. */
+	public KtlintConfig ktlint(String version) throws IOException {
+		return new KtlintConfig(version, isScript(), Collections.emptyMap(), Collections.emptyMap());
+	}
+
+	/** Uses the <a href="https://github.com/facebookincubator/ktfmt">ktfmt</a> jar to format source code. */
+	public KtfmtConfig ktfmt() {
+		return ktfmt(KtfmtStep.defaultVersion());
+	}
+
+	/**
+	 * Uses the given version of <a href="https://github.com/facebookincubator/ktfmt">ktfmt</a> and applies the dropbox style
+	 * option to format source code.
+	 */
+	public KtfmtConfig ktfmt(String version) {
+		return new KtfmtConfig(version);
+	}
+
+	protected abstract boolean isScript();
 
 	public class DiktatConfig {
 

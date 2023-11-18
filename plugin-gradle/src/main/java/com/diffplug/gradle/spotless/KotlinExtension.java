@@ -17,16 +17,9 @@ package com.diffplug.gradle.spotless;
 
 import static com.diffplug.spotless.kotlin.KotlinConstants.LICENSE_HEADER_DELIMITER;
 
-import java.io.IOException;
-import java.util.Collections;
-
 import javax.inject.Inject;
 
 import org.gradle.api.tasks.SourceSet;
-
-import com.diffplug.spotless.kotlin.DiktatStep;
-import com.diffplug.spotless.kotlin.KtLintStep;
-import com.diffplug.spotless.kotlin.KtfmtStep;
 
 public class KotlinExtension extends BaseKotlinExtension implements HasBuiltinDelimiterForLicense, JvmLang {
 	static final String NAME = "kotlin";
@@ -46,35 +39,9 @@ public class KotlinExtension extends BaseKotlinExtension implements HasBuiltinDe
 		return licenseHeaderFile(licenseHeaderFile, LICENSE_HEADER_DELIMITER);
 	}
 
-	/** Adds the specified version of <a href="https://github.com/pinterest/ktlint">ktlint</a>. */
-	public KtlintConfig ktlint(String version) throws IOException {
-		return new KtlintConfig(version, false, Collections.emptyMap(), Collections.emptyMap());
-	}
-
-	public KtlintConfig ktlint() throws IOException {
-		return ktlint(KtLintStep.defaultVersion());
-	}
-
-	/** Uses the <a href="https://github.com/facebookincubator/ktfmt">ktfmt</a> jar to format source code. */
-	public KtfmtConfig ktfmt() {
-		return ktfmt(KtfmtStep.defaultVersion());
-	}
-
-	/**
-	 * Uses the given version of <a href="https://github.com/facebookincubator/ktfmt">ktfmt</a> and applies the dropbox style
-	 * option to format source code.
-	 */
-	public KtfmtConfig ktfmt(String version) {
-		return new KtfmtConfig(version);
-	}
-
-	/** Adds the specified version of <a href="https://github.com/cqfn/diKTat">diktat</a>. */
-	public DiktatConfig diktat(String version) {
-		return new DiktatConfig(version, false);
-	}
-
-	public DiktatConfig diktat() {
-		return diktat(DiktatStep.defaultVersionDiktat());
+	@Override
+	protected boolean isScript() {
+		return false;
 	}
 
 	/** If the user hasn't specified the files yet, we'll assume he/she means all of the kotlin files. */

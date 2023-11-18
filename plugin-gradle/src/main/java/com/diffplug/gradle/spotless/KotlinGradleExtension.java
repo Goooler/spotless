@@ -15,14 +15,7 @@
  */
 package com.diffplug.gradle.spotless;
 
-import java.io.IOException;
-import java.util.Collections;
-
 import javax.inject.Inject;
-
-import com.diffplug.spotless.kotlin.DiktatStep;
-import com.diffplug.spotless.kotlin.KtLintStep;
-import com.diffplug.spotless.kotlin.KtfmtStep;
 
 public class KotlinGradleExtension extends BaseKotlinExtension {
 	private static final String GRADLE_KOTLIN_DSL_FILE_EXTENSION = "*.gradle.kts";
@@ -34,35 +27,9 @@ public class KotlinGradleExtension extends BaseKotlinExtension {
 		super(spotless);
 	}
 
-	/** Adds the specified version of <a href="https://github.com/pinterest/ktlint">ktlint</a>. */
-	public KtlintConfig ktlint(String version) throws IOException {
-		return new KtlintConfig(version, true, Collections.emptyMap(), Collections.emptyMap());
-	}
-
-	public KtlintConfig ktlint() throws IOException {
-		return ktlint(KtLintStep.defaultVersion());
-	}
-
-	/** Uses the <a href="https://github.com/facebookincubator/ktfmt">ktfmt</a> jar to format source code. */
-	public KtfmtConfig ktfmt() {
-		return ktfmt(KtfmtStep.defaultVersion());
-	}
-
-	/**
-	 * Uses the given version of <a href="https://github.com/facebookincubator/ktfmt">ktfmt</a> to format source
-	 * code.
-	 */
-	public KtfmtConfig ktfmt(String version) {
-		return new KtfmtConfig(version);
-	}
-
-	/** Adds the specified version of <a href="https://github.com/cqfn/diKTat">diktat</a>. */
-	public DiktatConfig diktat(String version) {
-		return new DiktatConfig(version, true);
-	}
-
-	public DiktatConfig diktat() {
-		return diktat(DiktatStep.defaultVersionDiktat());
+	@Override
+	protected boolean isScript() {
+		return true;
 	}
 
 	@Override
