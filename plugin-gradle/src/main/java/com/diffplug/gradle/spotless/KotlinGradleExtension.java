@@ -45,18 +45,18 @@ public class KotlinGradleExtension extends FormatExtension {
 	}
 
 	/** Adds the specified version of <a href="https://github.com/pinterest/ktlint">ktlint</a>. */
-	public KotlinFormatExtension ktlint(String version) throws IOException {
+	public KtlintFormatExtension ktlint(String version) throws IOException {
 		Objects.requireNonNull(version, "version");
 		File defaultEditorConfig = getProject().getRootProject().file(".editorconfig");
 		FileSignature editorConfigPath = defaultEditorConfig.exists() ? FileSignature.signAsList(defaultEditorConfig) : null;
-		return new KotlinFormatExtension(version, editorConfigPath, Collections.emptyMap(), Collections.emptyMap());
+		return new KtlintFormatExtension(version, editorConfigPath, Collections.emptyMap(), Collections.emptyMap());
 	}
 
-	public KotlinFormatExtension ktlint() throws IOException {
+	public KtlintFormatExtension ktlint() throws IOException {
 		return ktlint(KtLintStep.defaultVersion());
 	}
 
-	public class KotlinFormatExtension {
+	public class KtlintFormatExtension {
 
 		private final String version;
 		@Nullable
@@ -64,7 +64,7 @@ public class KotlinGradleExtension extends FormatExtension {
 		private Map<String, String> userData;
 		private Map<String, Object> editorConfigOverride;
 
-		KotlinFormatExtension(String version, FileSignature editorConfigPath, Map<String, String> config,
+		KtlintFormatExtension(String version, FileSignature editorConfigPath, Map<String, String> config,
 				Map<String, Object> editorConfigOverride) {
 			this.version = version;
 			this.editorConfigPath = editorConfigPath;
@@ -73,7 +73,7 @@ public class KotlinGradleExtension extends FormatExtension {
 			addStep(createStep());
 		}
 
-		public KotlinFormatExtension setEditorConfigPath(Object editorConfigPath) throws IOException {
+		public KtlintFormatExtension setEditorConfigPath(Object editorConfigPath) throws IOException {
 			if (editorConfigPath == null) {
 				this.editorConfigPath = null;
 			} else {
@@ -87,7 +87,7 @@ public class KotlinGradleExtension extends FormatExtension {
 			return this;
 		}
 
-		public KotlinFormatExtension userData(Map<String, String> userData) {
+		public KtlintFormatExtension userData(Map<String, String> userData) {
 			// Copy the map to a sorted map because up-to-date checking is based on binary-equals of the serialized
 			// representation.
 			this.userData = ImmutableSortedMap.copyOf(userData);
@@ -95,7 +95,7 @@ public class KotlinGradleExtension extends FormatExtension {
 			return this;
 		}
 
-		public KotlinFormatExtension editorConfigOverride(Map<String, Object> editorConfigOverride) {
+		public KtlintFormatExtension editorConfigOverride(Map<String, Object> editorConfigOverride) {
 			// Copy the map to a sorted map because up-to-date checking is based on binary-equals of the serialized
 			// representation.
 			this.editorConfigOverride = ImmutableSortedMap.copyOf(editorConfigOverride);
