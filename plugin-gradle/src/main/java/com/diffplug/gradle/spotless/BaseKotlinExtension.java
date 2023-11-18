@@ -121,8 +121,11 @@ public abstract class BaseKotlinExtension extends FormatExtension {
 		private Map<String, String> userData;
 		private Map<String, Object> editorConfigOverride;
 
-		KtlintConfig(String version, boolean isScript, @Nullable FileSignature editorConfigPath, Map<String, String> config,
-				Map<String, Object> editorConfigOverride) {
+		KtlintConfig(String version, boolean isScript, Map<String, String> config,
+				Map<String, Object> editorConfigOverride) throws IOException {
+			Objects.requireNonNull(version);
+			File defaultEditorConfig = getProject().getRootProject().file(".editorconfig");
+			FileSignature editorConfigPath = defaultEditorConfig.exists() ? FileSignature.signAsList(defaultEditorConfig) : null;
 			this.version = version;
 			this.isScript = isScript;
 			this.editorConfigPath = editorConfigPath;

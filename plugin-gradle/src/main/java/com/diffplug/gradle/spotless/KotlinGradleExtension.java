@@ -15,14 +15,12 @@
  */
 package com.diffplug.gradle.spotless;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Objects;
 
 import javax.inject.Inject;
 
-import com.diffplug.spotless.FileSignature;
 import com.diffplug.spotless.kotlin.DiktatStep;
 import com.diffplug.spotless.kotlin.KtLintStep;
 import com.diffplug.spotless.kotlin.KtfmtStep;
@@ -39,10 +37,7 @@ public class KotlinGradleExtension extends BaseKotlinExtension {
 
 	/** Adds the specified version of <a href="https://github.com/pinterest/ktlint">ktlint</a>. */
 	public KtlintConfig ktlint(String version) throws IOException {
-		Objects.requireNonNull(version, "version");
-		File defaultEditorConfig = getProject().getRootProject().file(".editorconfig");
-		FileSignature editorConfigPath = defaultEditorConfig.exists() ? FileSignature.signAsList(defaultEditorConfig) : null;
-		return new KtlintConfig(version, true, editorConfigPath, Collections.emptyMap(), Collections.emptyMap());
+		return new KtlintConfig(version, true, Collections.emptyMap(), Collections.emptyMap());
 	}
 
 	public KtlintConfig ktlint() throws IOException {
