@@ -17,7 +17,6 @@ package com.diffplug.gradle.spotless;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -54,13 +53,11 @@ public class KotlinGradleExtension extends BaseKotlinExtension {
 	 * code.
 	 */
 	public KtfmtConfig ktfmt(String version) {
-		Objects.requireNonNull(version);
 		return new KtfmtConfig(version);
 	}
 
 	/** Adds the specified version of <a href="https://github.com/cqfn/diKTat">diktat</a>. */
 	public DiktatConfig diktat(String version) {
-		Objects.requireNonNull(version, "version");
 		return new DiktatConfig(version, true);
 	}
 

@@ -42,6 +42,7 @@ public abstract class BaseKotlinExtension extends FormatExtension {
 		private FileSignature config;
 
 		DiktatConfig(String version, boolean isScript) {
+			Objects.requireNonNull(version, "version");
 			this.version = version;
 			this.isScript = isScript;
 			addStep(createStep());
@@ -71,6 +72,7 @@ public abstract class BaseKotlinExtension extends FormatExtension {
 		private final ConfigurableStyle configurableStyle = new ConfigurableStyle();
 
 		KtfmtConfig(String version) {
+			Objects.requireNonNull(version);
 			this.version = Objects.requireNonNull(version);
 			addStep(createStep());
 		}

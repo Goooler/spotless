@@ -19,7 +19,6 @@ import static com.diffplug.spotless.kotlin.KotlinConstants.LICENSE_HEADER_DELIMI
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -66,13 +65,11 @@ public class KotlinExtension extends BaseKotlinExtension implements HasBuiltinDe
 	 * option to format source code.
 	 */
 	public KtfmtConfig ktfmt(String version) {
-		Objects.requireNonNull(version);
 		return new KtfmtConfig(version);
 	}
 
 	/** Adds the specified version of <a href="https://github.com/cqfn/diKTat">diktat</a>. */
 	public DiktatConfig diktat(String version) {
-		Objects.requireNonNull(version);
 		return new DiktatConfig(version, false);
 	}
 
