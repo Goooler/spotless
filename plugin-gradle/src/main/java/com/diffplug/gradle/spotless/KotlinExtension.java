@@ -20,16 +20,13 @@ import static com.diffplug.spotless.kotlin.KotlinConstants.LICENSE_HEADER_DELIMI
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import org.gradle.api.tasks.SourceSet;
 
-import com.diffplug.common.collect.ImmutableSortedMap;
 import com.diffplug.spotless.FileSignature;
 import com.diffplug.spotless.FormatterStep;
 import com.diffplug.spotless.kotlin.DiktatStep;
@@ -38,7 +35,7 @@ import com.diffplug.spotless.kotlin.KtfmtStep;
 import com.diffplug.spotless.kotlin.KtfmtStep.KtfmtFormattingOptions;
 import com.diffplug.spotless.kotlin.KtfmtStep.Style;
 
-public class KotlinExtension extends FormatExtension implements HasBuiltinDelimiterForLicense, JvmLang {
+public class KotlinExtension extends BaseKotlinExtension implements HasBuiltinDelimiterForLicense, JvmLang {
 	static final String NAME = "kotlin";
 
 	@Inject
@@ -61,63 +58,11 @@ public class KotlinExtension extends FormatExtension implements HasBuiltinDelimi
 		Objects.requireNonNull(version);
 		File defaultEditorConfig = getProject().getRootProject().file(".editorconfig");
 		FileSignature editorConfigPath = defaultEditorConfig.exists() ? FileSignature.signAsList(defaultEditorConfig) : null;
-		return new KtlintConfig(version, editorConfigPath, Collections.emptyMap(), Collections.emptyMap());
+		return new KtlintConfig(version, false, editorConfigPath, Collections.emptyMap(), Collections.emptyMap());
 	}
 
 	public KtlintConfig ktlint() throws IOException {
 		return ktlint(KtLintStep.defaultVersion());
-	}
-
-	public class KtlintConfig {
-
-		private final String version;
-		@Nullable
-		private FileSignature editorConfigPath;
-		private Map<String, String> userData;
-		private Map<String, Object> editorConfigOverride;
-
-		KtlintConfig(String version, @Nullable FileSignature editorConfigPath, Map<String, String> config,
-				Map<String, Object> editorConfigOverride) {
-			this.version = version;
-			this.editorConfigPath = editorConfigPath;
-			this.userData = config;
-			this.editorConfigOverride = editorConfigOverride;
-			addStep(createStep());
-		}
-
-		public KtlintConfig setEditorConfigPath(Object editorConfigPath) throws IOException {
-			if (editorConfigPath == null) {
-				this.editorConfigPath = null;
-			} else {
-				File editorConfigFile = getProject().file(editorConfigPath);
-				if (!editorConfigFile.exists()) {
-					throw new IllegalArgumentException("EditorConfig file does not exist: " + editorConfigFile);
-				}
-				this.editorConfigPath = FileSignature.signAsList(editorConfigFile);
-			}
-			replaceStep(createStep());
-			return this;
-		}
-
-		public KtlintConfig userData(Map<String, String> userData) {
-			// Copy the map to a sorted map because up-to-date checking is based on binary-equals of the serialized
-			// representation.
-			this.userData = ImmutableSortedMap.copyOf(userData);
-			replaceStep(createStep());
-			return this;
-		}
-
-		public KtlintConfig editorConfigOverride(Map<String, Object> editorConfigOverride) {
-			// Copy the map to a sorted map because up-to-date checking is based on binary-equals of the serialized
-			// representation.
-			this.editorConfigOverride = ImmutableSortedMap.copyOf(editorConfigOverride);
-			replaceStep(createStep());
-			return this;
-		}
-
-		private FormatterStep createStep() {
-			return KtLintStep.create(version, provisioner(), false, editorConfigPath, userData, editorConfigOverride);
-		}
 	}
 
 	/** Uses the <a href="https://github.com/facebookincubator/ktfmt">ktfmt</a> jar to format source code. */

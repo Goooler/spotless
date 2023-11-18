@@ -18,14 +18,11 @@ package com.diffplug.gradle.spotless;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 
-import com.diffplug.common.collect.ImmutableSortedMap;
 import com.diffplug.spotless.FileSignature;
 import com.diffplug.spotless.FormatterStep;
 import com.diffplug.spotless.kotlin.DiktatStep;
@@ -34,7 +31,7 @@ import com.diffplug.spotless.kotlin.KtfmtStep;
 import com.diffplug.spotless.kotlin.KtfmtStep.KtfmtFormattingOptions;
 import com.diffplug.spotless.kotlin.KtfmtStep.Style;
 
-public class KotlinGradleExtension extends FormatExtension {
+public class KotlinGradleExtension extends BaseKotlinExtension {
 	private static final String GRADLE_KOTLIN_DSL_FILE_EXTENSION = "*.gradle.kts";
 
 	static final String NAME = "kotlinGradle";
@@ -49,68 +46,11 @@ public class KotlinGradleExtension extends FormatExtension {
 		Objects.requireNonNull(version, "version");
 		File defaultEditorConfig = getProject().getRootProject().file(".editorconfig");
 		FileSignature editorConfigPath = defaultEditorConfig.exists() ? FileSignature.signAsList(defaultEditorConfig) : null;
-		return new KtlintConfig(version, editorConfigPath, Collections.emptyMap(), Collections.emptyMap());
+		return new KtlintConfig(version, true, editorConfigPath, Collections.emptyMap(), Collections.emptyMap());
 	}
 
 	public KtlintConfig ktlint() throws IOException {
 		return ktlint(KtLintStep.defaultVersion());
-	}
-
-	public class KtlintConfig {
-
-		private final String version;
-		@Nullable
-		private FileSignature editorConfigPath;
-		private Map<String, String> userData;
-		private Map<String, Object> editorConfigOverride;
-
-		KtlintConfig(String version, FileSignature editorConfigPath, Map<String, String> config,
-				Map<String, Object> editorConfigOverride) {
-			this.version = version;
-			this.editorConfigPath = editorConfigPath;
-			this.userData = config;
-			this.editorConfigOverride = editorConfigOverride;
-			addStep(createStep());
-		}
-
-		public KtlintConfig setEditorConfigPath(Object editorConfigPath) throws IOException {
-			if (editorConfigPath == null) {
-				this.editorConfigPath = null;
-			} else {
-				File editorConfigFile = getProject().file(editorConfigPath);
-				if (!editorConfigFile.exists()) {
-					throw new IllegalArgumentException("EditorConfig file does not exist: " + editorConfigFile);
-				}
-				this.editorConfigPath = FileSignature.signAsList(editorConfigFile);
-			}
-			replaceStep(createStep());
-			return this;
-		}
-
-		public KtlintConfig userData(Map<String, String> userData) {
-			// Copy the map to a sorted map because up-to-date checking is based on binary-equals of the serialized
-			// representation.
-			this.userData = ImmutableSortedMap.copyOf(userData);
-			replaceStep(createStep());
-			return this;
-		}
-
-		public KtlintConfig editorConfigOverride(Map<String, Object> editorConfigOverride) {
-			// Copy the map to a sorted map because up-to-date checking is based on binary-equals of the serialized
-			// representation.
-			this.editorConfigOverride = ImmutableSortedMap.copyOf(editorConfigOverride);
-			replaceStep(createStep());
-			return this;
-		}
-
-		private FormatterStep createStep() {
-			return KtLintStep.createForScript(
-					version,
-					provisioner(),
-					editorConfigPath,
-					userData,
-					editorConfigOverride);
-		}
 	}
 
 	/** Uses the <a href="https://github.com/facebookincubator/ktfmt">ktfmt</a> jar to format source code. */
