@@ -42,7 +42,7 @@ public abstract class BaseKotlinExtension extends FormatExtension {
 
 	/** Adds the specified version of <a href="https://github.com/cqfn/diKTat">diktat</a>. */
 	public DiktatConfig diktat(String version) {
-		return new DiktatConfig(version, isScript());
+		return new DiktatConfig(version);
 	}
 
 	public KtlintConfig ktlint() throws IOException {
@@ -51,7 +51,7 @@ public abstract class BaseKotlinExtension extends FormatExtension {
 
 	/** Adds the specified version of <a href="https://github.com/pinterest/ktlint">ktlint</a>. */
 	public KtlintConfig ktlint(String version) throws IOException {
-		return new KtlintConfig(version, isScript(), Collections.emptyMap(), Collections.emptyMap());
+		return new KtlintConfig(version, Collections.emptyMap(), Collections.emptyMap());
 	}
 
 	/** Uses the <a href="https://github.com/facebookincubator/ktfmt">ktfmt</a> jar to format source code. */
@@ -72,13 +72,11 @@ public abstract class BaseKotlinExtension extends FormatExtension {
 	public class DiktatConfig {
 
 		private final String version;
-		private final boolean isScript;
 		private FileSignature config;
 
-		DiktatConfig(String version, boolean isScript) {
+		DiktatConfig(String version) {
 			Objects.requireNonNull(version, "version");
 			this.version = version;
-			this.isScript = isScript;
 			addStep(createStep());
 		}
 
@@ -94,7 +92,7 @@ public abstract class BaseKotlinExtension extends FormatExtension {
 		}
 
 		private FormatterStep createStep() {
-			return DiktatStep.create(version, provisioner(), isScript, config);
+			return DiktatStep.create(version, provisioner(), isScript(), config);
 		}
 	}
 
@@ -151,19 +149,17 @@ public abstract class BaseKotlinExtension extends FormatExtension {
 	public class KtlintConfig {
 
 		private final String version;
-		private final boolean isScript;
 		@Nullable
 		private FileSignature editorConfigPath;
 		private Map<String, String> userData;
 		private Map<String, Object> editorConfigOverride;
 
-		KtlintConfig(String version, boolean isScript, Map<String, String> config,
+		KtlintConfig(String version, Map<String, String> config,
 				Map<String, Object> editorConfigOverride) throws IOException {
 			Objects.requireNonNull(version);
 			File defaultEditorConfig = getProject().getRootProject().file(".editorconfig");
 			FileSignature editorConfigPath = defaultEditorConfig.exists() ? FileSignature.signAsList(defaultEditorConfig) : null;
 			this.version = version;
-			this.isScript = isScript;
 			this.editorConfigPath = editorConfigPath;
 			this.userData = config;
 			this.editorConfigOverride = editorConfigOverride;
@@ -204,7 +200,7 @@ public abstract class BaseKotlinExtension extends FormatExtension {
 			return KtLintStep.create(
 					version,
 					provisioner(),
-					isScript,
+					isScript(),
 					editorConfigPath,
 					userData,
 					editorConfigOverride);
