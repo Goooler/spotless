@@ -59,7 +59,7 @@ public class GradleProvisionerTest extends GradleIntegrationHarness {
 				"tasks.register('resolveDeps') {",
 				"    def files = GradleProvisioner.forProject(project)",
 				String.format(".provisionWithTransitives(%s, [%s])", withTransitives, dep),
-				"    println files.collect(File::getName).join(', ')",
+				"    println files.collect { it.getName() }.join(', ')",
 				"}");
 		return gradleRunner().withArguments("resolveDeps").build().getOutput();
 	}
