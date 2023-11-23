@@ -44,27 +44,27 @@ public final class JarState implements Serializable {
 	}
 
 	/** Provisions the given maven coordinate and its transitive dependencies. */
-	public static JarState from(Object mavenCoordinate, Provisioner provisioner) throws IOException {
+	public static JarState from(Object dependency, Provisioner provisioner) throws IOException {
 		final Collection<?> mavenCoordinates;
-		if (mavenCoordinate instanceof Collection) {
-			mavenCoordinates = (Collection<?>) mavenCoordinate;
+		if (dependency instanceof Collection) {
+			mavenCoordinates = (Collection<?>) dependency;
 		} else {
-			mavenCoordinates = Collections.singletonList(mavenCoordinate);
+			mavenCoordinates = Collections.singletonList(dependency);
 		}
 		return from(mavenCoordinates, provisioner);
 	}
 
 	/** Provisions the given maven coordinates and their transitive dependencies. */
-	public static JarState from(Collection<?> mavenCoordinates, Provisioner provisioner) throws IOException {
-		return from(mavenCoordinates, provisioner, true);
+	public static JarState from(Collection<?> dependencies, Provisioner provisioner) throws IOException {
+		return from(dependencies, provisioner, true);
 	}
 
-	public static JarState from(Collection<?> mavenCoordinates, Provisioner provisioner, boolean withTransitives) throws IOException {
-		Objects.requireNonNull(mavenCoordinates, "mavenCoordinates");
+	public static JarState from(Collection<?> dependencies, Provisioner provisioner, boolean withTransitives) throws IOException {
+		Objects.requireNonNull(dependencies, "dependencies");
 		Objects.requireNonNull(provisioner, "provisioner");
-		Set<File> jars = provisioner.provisionWithTransitives(withTransitives, mavenCoordinates);
+		Set<File> jars = provisioner.provisionWithTransitives(withTransitives, dependencies);
 		if (jars.isEmpty()) {
-			throw new NoSuchElementException("Resolved to an empty result: " + mavenCoordinates.stream().map(Object::toString).collect(Collectors.joining(", ")));
+			throw new NoSuchElementException("Resolved to an empty result: " + dependencies.stream().map(Object::toString).collect(Collectors.joining(", ")));
 		}
 		FileSignature fileSignature = FileSignature.signAsSet(jars);
 		return new JarState(fileSignature);

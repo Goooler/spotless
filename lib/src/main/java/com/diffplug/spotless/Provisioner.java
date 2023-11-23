@@ -29,5 +29,5 @@ public interface Provisioner {
 	 * Given a set of Maven coordinates, returns a set of jars which include all
 	 * the specified coordinates and optionally their transitive dependencies.
 	 */
-	Set<File> provisionWithTransitives(boolean withTransitives, Collection<?> mavenCoordinates);
+	Set<File> provisionWithTransitives(boolean withTransitives, Collection<?> dependencies);
 }
