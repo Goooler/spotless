@@ -156,7 +156,7 @@ public class EclipseBasedStepBuilder {
 
 		/** State constructor expects that all passed items are not modified afterwards */
 		protected State(String formatterVersion, String formatterStepExt, Provisioner jarProvisioner, List<String> dependencies, Iterable<File> settingsFiles) throws IOException {
-			this.jarState = JarState.withoutTransitives(dependencies, jarProvisioner);
+			this.jarState = JarState.from(dependencies, jarProvisioner, false);
 			this.settingsFiles = FileSignature.signAsList(settingsFiles);
 			this.formatterStepExt = formatterStepExt;
 			semanticVersion = convertEclipseVersion(formatterVersion);

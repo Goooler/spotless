@@ -50,15 +50,10 @@ public final class JarState implements Serializable {
 
 	/** Provisions the given maven coordinates and their transitive dependencies. */
 	public static JarState from(Collection<?> mavenCoordinates, Provisioner provisioner) throws IOException {
-		return provisionWithTransitives(true, mavenCoordinates, provisioner);
+		return from(mavenCoordinates, provisioner, true);
 	}
 
-	/** Provisions the given maven coordinates without their transitive dependencies. */
-	public static JarState withoutTransitives(Collection<?> mavenCoordinates, Provisioner provisioner) throws IOException {
-		return provisionWithTransitives(false, mavenCoordinates, provisioner);
-	}
-
-	private static JarState provisionWithTransitives(boolean withTransitives, Collection<?> mavenCoordinates, Provisioner provisioner) throws IOException {
+	public static JarState from(Collection<?> mavenCoordinates, Provisioner provisioner, boolean withTransitives) throws IOException {
 		Objects.requireNonNull(mavenCoordinates, "mavenCoordinates");
 		Objects.requireNonNull(provisioner, "provisioner");
 		Set<File> jars = provisioner.provisionWithTransitives(withTransitives, mavenCoordinates);
