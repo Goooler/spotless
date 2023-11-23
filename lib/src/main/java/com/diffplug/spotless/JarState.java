@@ -45,7 +45,13 @@ public final class JarState implements Serializable {
 
 	/** Provisions the given maven coordinate and its transitive dependencies. */
 	public static JarState from(Object mavenCoordinate, Provisioner provisioner) throws IOException {
-		return from(Collections.singletonList(mavenCoordinate), provisioner);
+		final Collection<?> mavenCoordinates;
+		if (mavenCoordinate instanceof Collection) {
+			mavenCoordinates = (Collection<?>) mavenCoordinate;
+		} else {
+			mavenCoordinates = Collections.singletonList(mavenCoordinate);
+		}
+		return from(mavenCoordinates, provisioner);
 	}
 
 	/** Provisions the given maven coordinates and their transitive dependencies. */
