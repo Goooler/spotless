@@ -16,7 +16,6 @@
 package com.diffplug.spotless;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
 
@@ -25,17 +24,10 @@ import java.util.Set;
  * Spotless' dependencies minimal.
  */
 public interface Provisioner {
-	/**
-	 * Given a set of Maven coordinates, returns a set of jars which include all
-	 * of the specified coordinates and optionally their transitive dependencies.
-	 */
-	public default Set<File> provisionWithTransitives(boolean withTransitives, Object... mavenCoordinates) {
-		return provisionWithTransitives(withTransitives, Arrays.asList(mavenCoordinates));
-	}
 
 	/**
 	 * Given a set of Maven coordinates, returns a set of jars which include all
-	 * of the specified coordinates and optionally their transitive dependencies.
+	 * the specified coordinates and optionally their transitive dependencies.
 	 */
-	public Set<File> provisionWithTransitives(boolean withTransitives, Collection<?> mavenCoordinates);
+	Set<File> provisionWithTransitives(boolean withTransitives, Collection<?> mavenCoordinates);
 }
