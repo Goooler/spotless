@@ -23,18 +23,33 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 public class GradleProvisionerTest extends GradleIntegrationHarness {
-	private static final String JUPITER_COORDINATE = "org.junit.jupiter:junit-jupiter:5.10.0";
+	private static final String JUPITER_COORDINATE = "'" + "org.junit.jupiter:junit-jupiter:5.10.0" + "'";
 	private static final String JUPITER_TRANSITIVE = "junit-jupiter-params-5.10.0.jar, junit-jupiter-engine-5.10.0.jar, junit-jupiter-api-5.10.0.jar, junit-platform-engine-1.10.0.jar, junit-platform-commons-1.10.0.jar, junit-jupiter-5.10.0.jar, opentest4j-1.3.0.jar";
-	private static final String JUPITER_INTRANSITIVE = "junit-jupiter-5.10.0.jar";
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	void canResolveMavenCoordinates(boolean withTransitives) throws IOException {
-		String output = resolveDeps(withTransitives, "'" + JUPITER_COORDINATE + "'");
-		assertThat(output).contains(withTransitives ? JUPITER_TRANSITIVE : JUPITER_INTRANSITIVE);
+		String output = resolveDepsResult(withTransitives, JUPITER_COORDINATE);
+		assertThat(output).contains(withTransitives ? JUPITER_TRANSITIVE : "junit-jupiter-5.10.0.jar");
 	}
 
-	private String resolveDeps(boolean withTransitives, Object dep) throws IOException {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void canResolveLocalProject(boolean withTransitives) throws IOException {
+		setFile("settings.gradle").toLines("include 'sub'");
+		setFile("sub/build.gradle").toLines(
+				"plugins {",
+				"    id 'java'",
+				"}",
+				"repositories { mavenCentral() }",
+				"dependencies {",
+				"    implementation " + JUPITER_COORDINATE,
+				"}");
+		String output = resolveDepsResult(withTransitives, "project(':sub')");
+		assertThat(output).contains(withTransitives ? JUPITER_TRANSITIVE : "sub.jar");
+	}
+
+	private String resolveDepsResult(boolean withTransitives, Object dep) throws IOException {
 		setFile("build.gradle").toLines(
 				"import com.diffplug.gradle.spotless.GradleProvisioner",
 				"plugins {",
