@@ -100,10 +100,10 @@ public class TestProvisioner {
 		File testlib = new File(spotlessDir, "testlib");
 		File cacheFile = new File(testlib, "build/tmp/testprovisioner." + name + ".cache");
 
-		Map<ImmutableSet<String>, ImmutableSet<File>> cached;
+		Map<ImmutableSet<?>, ImmutableSet<File>> cached;
 		if (cacheFile.exists()) {
 			try (ObjectInputStream inputStream = new ObjectInputStream(Files.asByteSource(cacheFile).openBufferedStream())) {
-				cached = (Map<ImmutableSet<String>, ImmutableSet<File>>) inputStream.readObject();
+				cached = (Map<ImmutableSet<?>, ImmutableSet<File>>) inputStream.readObject();
 			} catch (IOException | ClassNotFoundException e) {
 				throw Errors.asRuntime(e);
 			}
@@ -116,7 +116,7 @@ public class TestProvisioner {
 			}
 		}
 		return (withTransitives, mavenCoordsRaw) -> {
-			ImmutableSet<String> mavenCoords = ImmutableSet.copyOf(mavenCoordsRaw);
+			ImmutableSet<?> mavenCoords = ImmutableSet.copyOf(mavenCoordsRaw);
 			synchronized (TestProvisioner.class) {
 				ImmutableSet<File> result = cached.get(mavenCoords);
 				// double-check that depcache pruning hasn't removed them since our cache cached them

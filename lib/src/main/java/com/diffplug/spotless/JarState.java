@@ -44,26 +44,26 @@ public final class JarState implements Serializable {
 	}
 
 	/** Provisions the given maven coordinate and its transitive dependencies. */
-	public static JarState from(String mavenCoordinate, Provisioner provisioner) throws IOException {
+	public static JarState from(Object mavenCoordinate, Provisioner provisioner) throws IOException {
 		return from(Collections.singletonList(mavenCoordinate), provisioner);
 	}
 
 	/** Provisions the given maven coordinates and their transitive dependencies. */
-	public static JarState from(Collection<String> mavenCoordinates, Provisioner provisioner) throws IOException {
+	public static JarState from(Collection<?> mavenCoordinates, Provisioner provisioner) throws IOException {
 		return provisionWithTransitives(true, mavenCoordinates, provisioner);
 	}
 
 	/** Provisions the given maven coordinates without their transitive dependencies. */
-	public static JarState withoutTransitives(Collection<String> mavenCoordinates, Provisioner provisioner) throws IOException {
+	public static JarState withoutTransitives(Collection<?> mavenCoordinates, Provisioner provisioner) throws IOException {
 		return provisionWithTransitives(false, mavenCoordinates, provisioner);
 	}
 
-	private static JarState provisionWithTransitives(boolean withTransitives, Collection<String> mavenCoordinates, Provisioner provisioner) throws IOException {
+	private static JarState provisionWithTransitives(boolean withTransitives, Collection<?> mavenCoordinates, Provisioner provisioner) throws IOException {
 		Objects.requireNonNull(mavenCoordinates, "mavenCoordinates");
 		Objects.requireNonNull(provisioner, "provisioner");
 		Set<File> jars = provisioner.provisionWithTransitives(withTransitives, mavenCoordinates);
 		if (jars.isEmpty()) {
-			throw new NoSuchElementException("Resolved to an empty result: " + mavenCoordinates.stream().collect(Collectors.joining(", ")));
+			throw new NoSuchElementException("Resolved to an empty result: " + mavenCoordinates.stream().map(Object::toString).collect(Collectors.joining(", ")));
 		}
 		FileSignature fileSignature = FileSignature.signAsSet(jars);
 		return new JarState(fileSignature);

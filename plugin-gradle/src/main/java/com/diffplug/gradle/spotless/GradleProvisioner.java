@@ -65,7 +65,7 @@ class GradleProvisioner {
 		}
 
 		@Override
-		public Set<File> provisionWithTransitives(boolean withTransitives, Collection<String> mavenCoordinates) {
+		public Set<File> provisionWithTransitives(boolean withTransitives, Collection<?> mavenCoordinates) {
 			Request req = new Request(withTransitives, mavenCoordinates);
 			Set<File> result;
 			synchronized (cache) {
@@ -144,9 +144,9 @@ class GradleProvisioner {
 	/** Models a request to the provisioner. */
 	private static class Request {
 		final boolean withTransitives;
-		final ImmutableList<String> mavenCoords;
+		final ImmutableList<?> mavenCoords;
 
-		public Request(boolean withTransitives, Collection<String> mavenCoords) {
+		public Request(boolean withTransitives, Collection<?> mavenCoords) {
 			this.withTransitives = withTransitives;
 			this.mavenCoords = ImmutableList.copyOf(mavenCoords);
 		}
