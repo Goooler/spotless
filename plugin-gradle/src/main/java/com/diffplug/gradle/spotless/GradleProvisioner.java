@@ -28,7 +28,9 @@ import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
 import org.gradle.api.attributes.Bundling;
 import org.gradle.api.attributes.Category;
+import org.gradle.api.attributes.java.TargetJvmEnvironment;
 import org.gradle.api.initialization.dsl.ScriptHandler;
+import org.gradle.util.GradleVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -124,6 +126,10 @@ class GradleProvisioner {
 				config.attributes(attr -> {
 					attr.attribute(Category.CATEGORY_ATTRIBUTE, project.getObjects().named(Category.class, Category.LIBRARY));
 					attr.attribute(Bundling.BUNDLING_ATTRIBUTE, project.getObjects().named(Bundling.class, Bundling.EXTERNAL));
+					// TARGET_JVM_ENVIRONMENT_ATTRIBUTE has been added in Gradle 7.0
+					if (GradleVersion.current().compareTo(GradleVersion.version(SpotlessPlugin.VER_GRADLE_7)) >= 0) {
+						attr.attribute(TargetJvmEnvironment.TARGET_JVM_ENVIRONMENT_ATTRIBUTE, project.getObjects().named(TargetJvmEnvironment.class, TargetJvmEnvironment.STANDARD_JVM));
+					}
 				});
 				return config.resolve();
 			} catch (Exception e) {

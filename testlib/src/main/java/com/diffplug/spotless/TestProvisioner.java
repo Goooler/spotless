@@ -33,7 +33,9 @@ import org.gradle.api.artifacts.ResolveException;
 import org.gradle.api.artifacts.dsl.RepositoryHandler;
 import org.gradle.api.attributes.Bundling;
 import org.gradle.api.attributes.Category;
+import org.gradle.api.attributes.java.TargetJvmEnvironment;
 import org.gradle.testfixtures.ProjectBuilder;
+import org.gradle.util.GradleVersion;
 
 import com.diffplug.common.base.Errors;
 import com.diffplug.common.base.StandardSystemProperty;
@@ -73,6 +75,10 @@ public class TestProvisioner {
 			config.attributes(attr -> {
 				attr.attribute(Category.CATEGORY_ATTRIBUTE, project.getObjects().named(Category.class, Category.LIBRARY));
 				attr.attribute(Bundling.BUNDLING_ATTRIBUTE, project.getObjects().named(Bundling.class, Bundling.EXTERNAL));
+				// TARGET_JVM_ENVIRONMENT_ATTRIBUTE has been added in Gradle 7.0
+				if (GradleVersion.current().compareTo(GradleVersion.version("7.0")) >= 0) {
+					attr.attribute(TargetJvmEnvironment.TARGET_JVM_ENVIRONMENT_ATTRIBUTE, project.getObjects().named(TargetJvmEnvironment.class, TargetJvmEnvironment.STANDARD_JVM));
+				}
 			});
 			try {
 				return config.resolve();
