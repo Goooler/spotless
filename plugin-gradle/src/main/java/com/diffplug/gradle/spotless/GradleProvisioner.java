@@ -113,8 +113,7 @@ class GradleProvisioner {
 	private static Provisioner forConfigurationContainer(Project project, ConfigurationContainer configurations, DependencyHandler dependencies) {
 		return (withTransitives, mavenCoords) -> {
 			try {
-				Configuration config = configurations.create("spotless"
-						+ new Request(withTransitives, mavenCoords).hashCode());
+				Configuration config = configurations.maybeCreate("spotless");
 				mavenCoords.stream()
 						.map(dependencies::create)
 						.forEach(config.getDependencies()::add);
