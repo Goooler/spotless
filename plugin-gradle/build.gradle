@@ -41,7 +41,7 @@ tasks.withType(Test).configureEach {
 
 tasks.named('shadowJar') {
 	archiveClassifier = ''
-	enableRelocation = false
+	enableRelocation = true
 	relocationPrefix 'shadow'
 }
 
