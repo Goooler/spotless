@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 DiffPlug
+ * Copyright 2023-2024 DiffPlug
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,10 +40,6 @@ public class JacksonConfig implements Serializable {
 
 	public Map<String, Boolean> getFeatureToToggle() {
 		return Collections.unmodifiableMap(featureToToggle);
-	}
-
-	public void setFeatureToToggle(Map<String, Boolean> featureToToggle) {
-		this.featureToToggle = featureToToggle;
 	}
 
 	public void appendFeatureToToggle(Map<String, Boolean> features) {

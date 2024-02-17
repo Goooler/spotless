@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 DiffPlug
+ * Copyright 2021-2024 DiffPlug
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,26 +18,22 @@ package com.diffplug.spotless.glue.json;
 import java.util.Collection;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonFactoryBuilder;
-import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.core.util.Separators;
 
 import com.diffplug.spotless.FormatterFunc;
+import com.diffplug.spotless.glue.AJacksonFormatterFunc;
 import com.diffplug.spotless.json.JacksonJsonConfig;
 
 /**
  * A {@link FormatterFunc} based on Jackson library
  */
 // https://github.com/FasterXML/jackson-dataformats-text/issues/372
-public class JacksonJsonFormatterFunc extends AJacksonFormatterFunc {
-	private JacksonJsonConfig jacksonConfig;
+public class JacksonJsonFormatterFunc extends AJacksonFormatterFunc<JacksonJsonConfig> {
 
 	public JacksonJsonFormatterFunc(JacksonJsonConfig jacksonConfig) {
 		super(jacksonConfig);
-		this.jacksonConfig = jacksonConfig;
 	}
 
 	@Override
@@ -47,25 +43,6 @@ public class JacksonJsonFormatterFunc extends AJacksonFormatterFunc {
 		} else {
 			return Map.class;
 		}
-	}
-
-	/**
-	 * @return a {@link JsonFactory}. May be overridden to handle alternative formats.
-	 * @see <a href="https://github.com/FasterXML/jackson-dataformats-text">jackson-dataformats-text</a>
-	 */
-	protected JsonFactory makeJsonFactory() {
-		JsonFactory jsonFactory = new JsonFactoryBuilder().build();
-
-		// Configure the ObjectMapper
-		// https://github.com/FasterXML/jackson-databind#commonly-used-features
-		jacksonConfig.getJsonFeatureToToggle().forEach((rawFeature, toggle) -> {
-			// https://stackoverflow.com/questions/3735927/java-instantiating-an-enum-using-reflection
-			JsonGenerator.Feature feature = JsonGenerator.Feature.valueOf(rawFeature);
-
-			jsonFactory.configure(feature, toggle);
-		});
-
-		return jsonFactory;
 	}
 
 	@Override

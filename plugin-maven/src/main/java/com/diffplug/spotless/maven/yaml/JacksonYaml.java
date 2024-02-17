@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 DiffPlug
+ * Copyright 2023-2024 DiffPlug
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,11 @@ public class JacksonYaml implements FormatterStepFactory {
 	@Parameter
 	private Map<String, Boolean> features = Collections.emptyMap();
 
+	/**
+	 * @deprecated Use {@link #features} instead.
+	 */
 	@Parameter
+	@Deprecated
 	private Map<String, Boolean> yamlFeatures = Collections.emptyMap();
 
 	@Override
@@ -46,7 +50,7 @@ public class JacksonYaml implements FormatterStepFactory {
 		JacksonYamlConfig jacksonConfig = new JacksonYamlConfig();
 
 		jacksonConfig.appendFeatureToToggle(features);
-		jacksonConfig.appendYamlFeatureToToggle(yamlFeatures);
+		jacksonConfig.appendFeatureToToggle(yamlFeatures);
 
 		return JacksonYamlStep
 				.create(jacksonConfig, version, stepConfig.getProvisioner());

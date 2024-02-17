@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 DiffPlug
+ * Copyright 2023-2024 DiffPlug
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,33 +21,32 @@ import com.diffplug.spotless.FormatterStep;
 import com.diffplug.spotless.json.JacksonConfig;
 import com.diffplug.spotless.json.JacksonJsonStep;
 
-public abstract class AJacksonGradleConfig<T extends AJacksonGradleConfig> {
+public abstract class AJacksonGradleConfig<JGC extends AJacksonGradleConfig<JGC, JC>, JC extends JacksonConfig> {
 	protected final FormatExtension formatExtension;
 
-	protected JacksonConfig jacksonConfig;
+	protected JC jacksonConfig;
 
 	protected String version = JacksonJsonStep.defaultVersion();
 
 	// Make sure to call 'formatExtension.addStep(createStep());' in the extented constructors
-	public AJacksonGradleConfig(JacksonConfig jacksonConfig, FormatExtension formatExtension) {
+	public AJacksonGradleConfig(JC jacksonConfig, FormatExtension formatExtension) {
 		this.formatExtension = formatExtension;
-
 		this.jacksonConfig = jacksonConfig;
 	}
 
-	public T feature(String feature, boolean toggle) {
+	public JGC feature(String feature, boolean toggle) {
 		this.jacksonConfig.appendFeatureToToggle(Collections.singletonMap(feature, toggle));
 		formatExtension.replaceStep(createStep());
-		return self();
+		//noinspection unchecked
+		return (JGC) this;
 	}
 
-	public T version(String version) {
+	public JGC version(String version) {
 		this.version = version;
 		formatExtension.replaceStep(createStep());
-		return self();
+		//noinspection unchecked
+		return (JGC) this;
 	}
-
-	public abstract T self();
 
 	protected abstract FormatterStep createStep();
 }

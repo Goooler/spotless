@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2023 DiffPlug
+ * Copyright 2016-2024 DiffPlug
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -171,12 +171,9 @@ public class JsonExtension extends FormatExtension {
 		}
 	}
 
-	public static class JacksonJsonGradleConfig extends AJacksonGradleConfig<JacksonJsonGradleConfig> {
-		protected JacksonJsonConfig jacksonConfig;
-
+	public static class JacksonJsonGradleConfig extends AJacksonGradleConfig<JacksonJsonGradleConfig, JacksonJsonConfig> {
 		public JacksonJsonGradleConfig(JacksonJsonConfig jacksonConfig, FormatExtension formatExtension) {
 			super(jacksonConfig, formatExtension);
-			this.jacksonConfig = jacksonConfig;
 
 			formatExtension.addStep(createStep());
 		}
@@ -187,15 +184,13 @@ public class JsonExtension extends FormatExtension {
 
 		/**
 		 * Refers to com.fasterxml.jackson.core.JsonGenerator.Feature
+		 *
+		 * @deprecated use {@link #feature(String, boolean)} instead.
 		 */
+		@Deprecated
 		public JacksonJsonGradleConfig jsonFeature(String feature, boolean toggle) {
-			this.jacksonConfig.appendJsonFeatureToToggle(Collections.singletonMap(feature, toggle));
+			jacksonConfig.appendFeatureToToggle(Collections.singletonMap(feature, toggle));
 			formatExtension.replaceStep(createStep());
-			return this;
-		}
-
-		@Override
-		public JacksonJsonGradleConfig self() {
 			return this;
 		}
 

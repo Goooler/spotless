@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 DiffPlug
+ * Copyright 2023-2024 DiffPlug
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,11 @@ public class JacksonJson implements FormatterStepFactory {
 	@Parameter
 	private Map<String, Boolean> features = Collections.emptyMap();
 
+	/**
+	 * @deprecated Use {@link #features} instead.
+	 */
 	@Parameter
+	@Deprecated
 	private Map<String, Boolean> jsonFeatures = Collections.emptyMap();
 
 	@Override
@@ -49,7 +53,7 @@ public class JacksonJson implements FormatterStepFactory {
 		JacksonJsonConfig jacksonConfig = new JacksonJsonConfig();
 
 		jacksonConfig.appendFeatureToToggle(features);
-		jacksonConfig.appendJsonFeatureToToggle(jsonFeatures);
+		jacksonConfig.appendFeatureToToggle(jsonFeatures);
 		jacksonConfig.setSpaceBeforeSeparator(spaceBeforeSeparator);
 
 		return JacksonJsonStep

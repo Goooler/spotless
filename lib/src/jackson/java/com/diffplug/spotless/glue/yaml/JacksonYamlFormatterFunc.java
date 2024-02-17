@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 DiffPlug
+ * Copyright 2021-2024 DiffPlug
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,43 +19,22 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactoryBuilder;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 
-import com.diffplug.spotless.glue.json.AJacksonFormatterFunc;
+import com.diffplug.spotless.glue.AJacksonFormatterFunc;
 import com.diffplug.spotless.yaml.JacksonYamlConfig;
 
-public class JacksonYamlFormatterFunc extends AJacksonFormatterFunc {
-	final JacksonYamlConfig yamlConfig;
+public class JacksonYamlFormatterFunc extends AJacksonFormatterFunc<JacksonYamlConfig> {
 
 	public JacksonYamlFormatterFunc(JacksonYamlConfig jacksonConfig) {
 		super(jacksonConfig);
-		this.yamlConfig = jacksonConfig;
 
 		if (jacksonConfig == null) {
 			throw new IllegalArgumentException("ARG");
 		}
-	}
-
-	protected JsonFactory makeJsonFactory() {
-		YAMLFactoryBuilder yamlFactoryBuilder = new YAMLFactoryBuilder(new YAMLFactory());
-
-		// Configure the ObjectMapper
-		// https://github.com/FasterXML/jackson-databind#commonly-used-features
-		yamlConfig.getYamlFeatureToToggle().forEach((rawFeature, toggle) -> {
-			// https://stackoverflow.com/questions/3735927/java-instantiating-an-enum-using-reflection
-			YAMLGenerator.Feature feature = YAMLGenerator.Feature.valueOf(rawFeature);
-
-			yamlFactoryBuilder.configure(feature, toggle);
-		});
-
-		return yamlFactoryBuilder.build();
 	}
 
 	@Override

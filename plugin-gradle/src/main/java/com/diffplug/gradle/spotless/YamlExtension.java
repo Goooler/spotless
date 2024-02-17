@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2023 DiffPlug
+ * Copyright 2016-2024 DiffPlug
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,13 +43,9 @@ public class YamlExtension extends FormatExtension {
 		return new JacksonYamlGradleConfig(this);
 	}
 
-	public class JacksonYamlGradleConfig extends AJacksonGradleConfig<JacksonYamlGradleConfig> {
-		protected JacksonYamlConfig jacksonConfig;
-
+	public class JacksonYamlGradleConfig extends AJacksonGradleConfig<JacksonYamlGradleConfig, JacksonYamlConfig> {
 		public JacksonYamlGradleConfig(JacksonYamlConfig jacksonConfig, FormatExtension formatExtension) {
 			super(jacksonConfig, formatExtension);
-
-			this.jacksonConfig = jacksonConfig;
 
 			formatExtension.addStep(createStep());
 		}
@@ -60,15 +56,13 @@ public class YamlExtension extends FormatExtension {
 
 		/**
 		 * Refers to com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature
+		 *
+		 * @deprecated Use {@link #feature(String, boolean)} instead.
 		 */
+		@Deprecated
 		public JacksonYamlGradleConfig yamlFeature(String feature, boolean toggle) {
-			this.jacksonConfig.appendYamlFeatureToToggle(Collections.singletonMap(feature, toggle));
+			jacksonConfig.appendFeatureToToggle(Collections.singletonMap(feature, toggle));
 			formatExtension.replaceStep(createStep());
-			return this;
-		}
-
-		@Override
-		public JacksonYamlGradleConfig self() {
 			return this;
 		}
 
