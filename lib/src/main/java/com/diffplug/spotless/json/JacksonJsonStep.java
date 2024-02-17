@@ -33,7 +33,7 @@ import com.diffplug.spotless.Provisioner;
 public class JacksonJsonStep {
 	static final String MAVEN_COORDINATE = "com.fasterxml.jackson.core:jackson-databind:";
 	// https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
-	static final String DEFAULT_VERSION = "2.14.2";
+	static final String DEFAULT_VERSION = "2.16.1";
 
 	private JacksonJsonStep() {}
 

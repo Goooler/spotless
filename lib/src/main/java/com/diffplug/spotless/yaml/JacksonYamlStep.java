@@ -34,7 +34,7 @@ import com.diffplug.spotless.Provisioner;
 public class JacksonYamlStep {
 	static final String MAVEN_COORDINATE = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:";
 	// https://mvnrepository.com/artifact/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml
-	static final String DEFAULT_VERSION = "2.14.1";
+	static final String DEFAULT_VERSION = "2.16.1";
 
 	private JacksonYamlStep() {}
 
