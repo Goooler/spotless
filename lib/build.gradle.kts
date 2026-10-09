@@ -163,6 +163,8 @@ dependencies {
   "javaParserCompileOnly"(libs.javaparser.symbol.solver.core)
   // ktfmt
   "ktfmtCompileOnly"(libs.ktfmt)
+  // runtime dependency of ktfmt, referenced by EditorConfigResolver
+  "ktfmtCompileOnly"(libs.ec4j.core)
   "ktfmtCompileOnly"(pinnedLibs.google.java.format) // for JDK 8 compatibility
   "ktfmtCompileOnly"(libs.jsr305)
   // ktlint latest supported version

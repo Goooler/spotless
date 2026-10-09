@@ -231,6 +231,79 @@ class KotlinExtensionTest extends GradleIntegrationHarness {
 		assertFile("src/main/kotlin/max-width.kt").sameAsResource("kotlin/ktfmt/max-width.clean");
 	}
 
+	@Test
+	void testWithEditorConfigKtfmt() throws IOException {
+		setFile("build.gradle").toLines(
+				"plugins {",
+				"    id 'org.jetbrains.kotlin.jvm' version '2.1.10'",
+				"    id 'com.diffplug.spotless'",
+				"}",
+				"repositories { mavenCentral() }",
+				"spotless {",
+				"    kotlin {",
+				"        ktfmt().enableEditorConfig()",
+				"    }",
+				"}");
+		setFile(".editorconfig").toLines("root = true", "[*.{kt,kts}]", "max_line_length = 120");
+
+		setFile("src/main/kotlin/max-width.kt").toResource("kotlin/ktfmt/max-width.dirty");
+		gradleRunner().withArguments("spotlessApply").build();
+		assertFile("src/main/kotlin/max-width.kt").sameAsResource("kotlin/ktfmt/max-width.clean");
+
+		// changing the `.editorconfig` alone must invalidate the up-to-date check and ktfmt's cache of it
+		setFile(".editorconfig").toLines("root = true", "[*.{kt,kts}]", "max_line_length = 40");
+		gradleRunner().withArguments("spotlessCheck").buildAndFail();
+		setFile(".editorconfig").toLines("root = true", "[*.{kt,kts}]", "max_line_length = 120");
+		gradleRunner().withArguments("spotlessCheck").build();
+	}
+
+	@Test
+	void testWithStyleThenEditorConfigKtfmt() throws IOException {
+		setFile("build.gradle").toLines(
+				"plugins {",
+				"    id 'org.jetbrains.kotlin.jvm' version '2.1.10'",
+				"    id 'com.diffplug.spotless'",
+				"}",
+				"repositories { mavenCentral() }",
+				"spotless {",
+				"    kotlin {",
+				"        ktfmt().metaStyle().enableEditorConfig().configure {",
+				"            it.setRemoveUnusedImports(true)",
+				"        }",
+				"    }",
+				"}");
+		setFile(".editorconfig").toLines("root = true", "[*.{kt,kts}]", "max_line_length = 120");
+
+		setFile("src/main/kotlin/max-width.kt").toResource("kotlin/ktfmt/max-width.dirty");
+		gradleRunner().withArguments("spotlessApply").build();
+		assertFile("src/main/kotlin/max-width.kt").sameAsResource("kotlin/ktfmt/max-width.clean");
+	}
+
+	@Test
+	void testWithRootEditorConfigInSubprojectKtfmt() throws IOException {
+		setFile("settings.gradle").toLines("include 'sub'");
+		setFile("sub/build.gradle").toLines(
+				"plugins {",
+				"    id 'com.diffplug.spotless'",
+				"}",
+				"repositories { mavenCentral() }",
+				"spotless {",
+				"    kotlin {",
+				"        target 'src/**/*.kt'",
+				"        ktfmt().enableEditorConfig()",
+				"    }",
+				"}");
+		setFile(".editorconfig").toLines("root = true", "[*.{kt,kts}]", "max_line_length = 120");
+
+		setFile("sub/src/main/kotlin/max-width.kt").toResource("kotlin/ktfmt/max-width.dirty");
+		gradleRunner().withArguments(":sub:spotlessApply").build();
+		assertFile("sub/src/main/kotlin/max-width.kt").sameAsResource("kotlin/ktfmt/max-width.clean");
+
+		// the root project's `.editorconfig` is tracked by the subproject too
+		setFile(".editorconfig").toLines("root = true", "[*.{kt,kts}]", "max_line_length = 40");
+		gradleRunner().withArguments(":sub:spotlessCheck").buildAndFail();
+	}
+
 	private void checkKtlintOfficialStyle() throws IOException {
 		String path = "src/main/kotlin/Main.kt";
 		setFile(path).toResource("kotlin/ktlint/experimentalEditorConfigOverride.dirty");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2025 DiffPlug
+ * Copyright 2016-2026 DiffPlug
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,11 +48,14 @@ public class Ktfmt implements FormatterStepFactory {
 	@Parameter
 	private TrailingCommaManagementStrategy trailingCommaManagementStrategy;
 
+	@Parameter
+	private boolean enableEditorConfig;
+
 	@Override
 	public FormatterStep newFormatterStep(FormatterStepConfig config) {
 		String version = this.version != null ? this.version : KtfmtStep.defaultVersion();
 		Style style = this.style != null ? Style.valueOf(this.style) : null;
 		KtfmtFormattingOptions options = new KtfmtFormattingOptions(maxWidth, blockIndent, continuationIndent, removeUnusedImports, trailingCommaManagementStrategy);
-		return KtfmtStep.create(version, config.getProvisioner(), style, options);
+		return KtfmtStep.create(version, config.getProvisioner(), style, options, enableEditorConfig ? config.getFileLocator().getBaseDir() : null);
 	}
 }

@@ -11,6 +11,10 @@ We adhere to the [keepachangelog](https://keepachangelog.com/en/1.0.0/) format (
 
 ## [Unreleased]
 
+### Added
+- Add `.editorconfig` support to `KtfmtStep` via a new `editorConfigDir` parameter. ([#3143](https://github.com/diffplug/spotless/pull/3143))  
+  Overrides the style with the `.editorconfig` properties supported by ktfmt `0.60+`, like its `--enable-editorconfig` flag. The `.editorconfig` files from `editorConfigDir` up to the root one are tracked in the step's state.
+
 ## [4.10.4] - 2026-10-08
 
 ### Changes

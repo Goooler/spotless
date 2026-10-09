@@ -20,6 +20,7 @@ import java.io.File;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.jetbrains.kotlinx.ktfmt.cli.EditorConfigResolver;
 import org.jetbrains.kotlinx.ktfmt.format.FileType;
 import org.jetbrains.kotlinx.ktfmt.format.Formatter;
 import org.jetbrains.kotlinx.ktfmt.format.FormattingOptions;
@@ -34,6 +35,8 @@ public final class KtfmtFormatterFunc implements FormatterFunc {
 
 	@Nullable private final KtfmtFormattingOptions ktfmtFormattingOptions;
 
+	private final boolean enableEditorConfig;
+
 	public KtfmtFormatterFunc() {
 		this(KtfmtStyle.META, null);
 	}
@@ -47,34 +50,47 @@ public final class KtfmtFormatterFunc implements FormatterFunc {
 	}
 
 	public KtfmtFormatterFunc(@Nonnull KtfmtStyle style, @Nullable KtfmtFormattingOptions ktfmtFormattingOptions) {
+		this(style, ktfmtFormattingOptions, false);
+	}
+
+	public KtfmtFormatterFunc(@Nonnull KtfmtStyle style, @Nullable KtfmtFormattingOptions ktfmtFormattingOptions, boolean enableEditorConfig) {
 		this.style = style;
 		this.ktfmtFormattingOptions = ktfmtFormattingOptions;
+		this.enableEditorConfig = enableEditorConfig;
 	}
 
 	@Nonnull
 	@Override
 	public String apply(@Nonnull String input) throws Exception {
-		return format(input, FileType.REGULAR);
+		return format(input, FileType.REGULAR, null);
 	}
 
 	@Nonnull
 	@Override
 	public String apply(@Nonnull String input, @Nonnull File file) throws Exception {
 		FileType fileType = file.getName().endsWith("." + FileType.SCRIPT.getExtension()) ? FileType.SCRIPT : FileType.REGULAR;
-		return format(input, fileType);
+		return format(input, fileType, file);
 	}
 
-	private String format(String input, FileType fileType) throws Exception {
-		return Formatter.format(createFormattingOptions(), KotlinCode.Companion.from(input, fileType));
+	private String format(String input, FileType fileType, @Nullable File file) throws Exception {
+		return Formatter.format(createFormattingOptions(file), KotlinCode.Companion.from(input, fileType));
 	}
 
-	private FormattingOptions createFormattingOptions() throws Exception {
+	/**
+	 * Resolves the options in order of increasing precedence: the style, the {@code .editorconfig} properties
+	 * (when enabled and the file is known), and the explicitly configured options.
+	 */
+	private FormattingOptions createFormattingOptions(@Nullable File file) throws Exception {
 		FormattingOptions formattingOptions = switch (style) {
 		case META -> Formatter.META_FORMAT;
 		case GOOGLE -> Formatter.GOOGLE_FORMAT;
 		case KOTLIN_LANG -> Formatter.KOTLINLANG_FORMAT;
 		default -> throw new IllegalStateException("Unknown formatting option " + style);
 		};
+
+		if (enableEditorConfig && file != null) {
+			formattingOptions = EditorConfigResolver.INSTANCE.resolveFormattingOptions(file, formattingOptions);
+		}
 
 		if (ktfmtFormattingOptions == null) {
 			return formattingOptions;

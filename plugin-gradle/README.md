@@ -666,6 +666,22 @@ spotless {
 }
 ```
 
+`enableEditorConfig()` (ktfmt `0.60+`) makes ktfmt read the `.editorconfig` files applying to each formatted file, like its
+[`--enable-editorconfig`](https://github.com/Kotlin/ktfmt#from-the-command-line) flag. The supported properties
+(`max_line_length`, `indent_size`, `ij_continuation_indent_size`, `ktfmt_trailing_comma_management_strategy`, ...) override
+the style, and the options set in `configure` take precedence over them. The `.editorconfig` files in the project directory and
+its parent directories (up to the one declaring `root = true`) are tracked, so changing them reformats the files. The ones in
+subdirectories (like `src/.editorconfig`) are applied but not tracked: after changing them, run `clean` or stop the Gradle daemon
+for the change to take effect.
+
+```kotlin
+spotless {
+  kotlin {
+    ktfmt().googleStyle().enableEditorConfig()
+  }
+}
+```
+
 <a name="applying-ktlint-to-kotlin-files"></a>
 
 ### ktlint

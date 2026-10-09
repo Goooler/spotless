@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2025 DiffPlug
+ * Copyright 2016-2026 DiffPlug
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,16 @@ class KtfmtTest extends MavenIntegrationHarness {
 	@Test
 	void testKtfmtWithMaxWidthOption() throws Exception {
 		writePomWithKotlinSteps("<ktfmt><maxWidth>120</maxWidth></ktfmt>");
+
+		setFile("src/main/kotlin/main.kt").toResource("kotlin/ktfmt/max-width.dirty");
+		mavenRunner().withArguments("spotless:apply").runNoError();
+		assertFile("src/main/kotlin/main.kt").sameAsResource("kotlin/ktfmt/max-width.clean");
+	}
+
+	@Test
+	void testKtfmtWithEditorConfig() throws Exception {
+		writePomWithKotlinSteps("<ktfmt><enableEditorConfig>true</enableEditorConfig></ktfmt>");
+		setFile(".editorconfig").toLines("root = true", "[*.{kt,kts}]", "max_line_length = 120");
 
 		setFile("src/main/kotlin/main.kt").toResource("kotlin/ktfmt/max-width.dirty");
 		mavenRunner().withArguments("spotless:apply").runNoError();

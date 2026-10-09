@@ -127,6 +127,7 @@ public abstract class BaseKotlinExtension extends FormatExtension {
 		private final ConfigurableStyle configurableStyle = new ConfigurableStyle();
 		private KtfmtStep.Style style;
 		private KtfmtStep.KtfmtFormattingOptions options;
+		private boolean enableEditorConfig;
 
 		private KtfmtConfig(String version) {
 			Objects.requireNonNull(version);
@@ -154,6 +155,20 @@ public abstract class BaseKotlinExtension extends FormatExtension {
 			this.configurableStyle.configure(optionsConfiguration);
 		}
 
+		/**
+		 * Overrides the style's configuration with the {@code .editorconfig} properties supported by ktfmt,
+		 * like its {@code --enable-editorconfig} flag. Requires ktfmt 0.60 or later.
+		 */
+		public KtfmtConfig enableEditorConfig() {
+			return enableEditorConfig(true);
+		}
+
+		public KtfmtConfig enableEditorConfig(boolean enableEditorConfig) {
+			this.enableEditorConfig = enableEditorConfig;
+			replaceStep(createStep());
+			return this;
+		}
+
 		private ConfigurableStyle style(KtfmtStep.Style style) {
 			this.style = style;
 			replaceStep(createStep());
@@ -161,10 +176,20 @@ public abstract class BaseKotlinExtension extends FormatExtension {
 		}
 
 		private FormatterStep createStep() {
-			return KtfmtStep.create(version, provisioner(), style, options);
+			return KtfmtStep.create(version, provisioner(), style, options, enableEditorConfig ? getProject().getProjectDir() : null);
 		}
 
 		public class ConfigurableStyle {
+			/** @see KtfmtConfig#enableEditorConfig() */
+			public ConfigurableStyle enableEditorConfig() {
+				return enableEditorConfig(true);
+			}
+
+			public ConfigurableStyle enableEditorConfig(boolean enableEditorConfig) {
+				KtfmtConfig.this.enableEditorConfig(enableEditorConfig);
+				return this;
+			}
+
 			public void configure(Consumer<KtfmtStep.KtfmtFormattingOptions> optionsConfiguration) {
 				KtfmtStep.KtfmtFormattingOptions ktfmtFormattingOptions = new KtfmtStep.KtfmtFormattingOptions();
 				optionsConfiguration.accept(ktfmtFormattingOptions);

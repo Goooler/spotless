@@ -20,15 +20,24 @@ import static com.diffplug.spotless.kotlin.KtfmtStep.Style.DROPBOX;
 import static com.diffplug.spotless.kotlin.KtfmtStep.Style.META;
 import static com.diffplug.spotless.kotlin.KtfmtStep.TrailingCommaManagementStrategy.ONLY_ADD;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
+import com.diffplug.spotless.FileSignature;
 import com.diffplug.spotless.FormatterFunc;
 import com.diffplug.spotless.FormatterStep;
 import com.diffplug.spotless.JarState;
@@ -40,7 +49,7 @@ import com.diffplug.spotless.ThrowingEx;
  */
 public final class KtfmtStep implements Serializable {
 	@Serial
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 2L;
 
 	private static final String NAME = "ktfmt";
 	/**
@@ -48,6 +57,9 @@ public final class KtfmtStep implements Serializable {
 	 */
 	private static final String MAVEN_COORDINATE = "org.jetbrains.kotlinx:ktfmt:";
 	private static final String MAVEN_COORDINATE_LEGACY = "com.facebook:ktfmt:";
+	private static final String EDITOR_CONFIG_FILE_NAME = ".editorconfig";
+	private static final String UTF8_BOM = "\uFEFF";
+	private static final Pattern EDITOR_CONFIG_ROOT = Pattern.compile("root\\s*=\\s*true");
 
 	private final String version;
 	/**
@@ -56,6 +68,11 @@ public final class KtfmtStep implements Serializable {
 	@Nullable private final Style style;
 	@Nullable private final KtfmtFormattingOptions options;
 	/**
+	 * When non-null, the style's configuration is overridden with the {@code .editorconfig} properties supported by ktfmt,
+	 * and the {@code .editorconfig} files from this directory up to the root one are tracked.
+	 */
+	@Nullable private final File editorConfigDir;
+	/**
 	 * The jar that contains the formatter.
 	 */
 	private final JarState.Promised jarState;
@@ -63,10 +80,12 @@ public final class KtfmtStep implements Serializable {
 	private KtfmtStep(String version,
 			JarState.Promised jarState,
 			@Nullable Style style,
-			@Nullable KtfmtFormattingOptions options) {
+			@Nullable KtfmtFormattingOptions options,
+			@Nullable File editorConfigDir) {
 		this.version = Objects.requireNonNull(version, "version");
 		this.style = style;
 		this.options = options;
+		this.editorConfigDir = editorConfigDir;
 		this.jarState = Objects.requireNonNull(jarState, "jarState");
 	}
 
@@ -214,10 +233,26 @@ public final class KtfmtStep implements Serializable {
 	 * Creates a step which formats everything - code, import order, and unused imports.
 	 */
 	public static FormatterStep create(String version, Provisioner provisioner, @Nullable Style style, @Nullable KtfmtFormattingOptions options) {
+		return create(version, provisioner, style, options, null);
+	}
+
+	/**
+	 * Creates a step which formats everything - code, import order, and unused imports.
+	 * <p>
+	 * When {@code editorConfigDir} is non-null, the {@code .editorconfig} files applying to each formatted file are resolved the same
+	 * way as ktfmt's {@code --enable-editorconfig} flag, and the supported properties ({@code max_line_length}, {@code indent_size},
+	 * {@code ij_continuation_indent_size}, {@code ktfmt_trailing_comma_management_strategy}, ...) override the style.
+	 * The explicitly configured {@code options} still take precedence over them. Requires ktfmt 0.60 or later.
+	 * <p>
+	 * The {@code .editorconfig} files in {@code editorConfigDir} and its parent directories, up to the first one declaring
+	 * {@code root = true}, are part of the step's state, so changing them invalidates the up-to-date checks.
+	 * {@code .editorconfig} files in its subdirectories are still applied, but not tracked.
+	 */
+	public static FormatterStep create(String version, Provisioner provisioner, @Nullable Style style, @Nullable KtfmtFormattingOptions options, @Nullable File editorConfigDir) {
 		Objects.requireNonNull(version, "version");
 		Objects.requireNonNull(provisioner, "provisioner");
 		return FormatterStep.create(NAME,
-				new KtfmtStep(version, JarState.promise(() -> JarState.from(mavenCoordinate(version) + version, provisioner)), style, options),
+				new KtfmtStep(version, JarState.promise(() -> JarState.from(mavenCoordinate(version) + version, provisioner)), style, options, editorConfigDir),
 				KtfmtStep::equalityState,
 				State::createFormat);
 	}
@@ -237,35 +272,83 @@ public final class KtfmtStep implements Serializable {
 		return BadSemver.version(version) < BadSemver.version(0, 65);
 	}
 
-	private State equalityState() {
-		return new State(version, jarState.get(), style, options);
+	private State equalityState() throws IOException {
+		FileSignature editorConfigFiles = editorConfigDir == null ? null : FileSignature.signAsList(findEditorConfigFiles(editorConfigDir));
+		return new State(version, jarState.get(), style, options, editorConfigFiles);
+	}
+
+	/**
+	 * Finds the {@code .editorconfig} files applying to {@code dir}, from the nearest one up to the first one declaring {@code root = true}.
+	 */
+	static List<File> findEditorConfigFiles(File dir) throws IOException {
+		List<File> files = new ArrayList<>();
+		for (File current = dir.getAbsoluteFile(); current != null; current = current.getParentFile()) {
+			File editorConfig = new File(current, EDITOR_CONFIG_FILE_NAME);
+			if (editorConfig.isFile()) {
+				files.add(editorConfig);
+				if (isRootEditorConfig(editorConfig)) {
+					break;
+				}
+			}
+		}
+		return files;
+	}
+
+	private static boolean isRootEditorConfig(File editorConfig) throws IOException {
+		// decode leniently, since only ASCII matters here and a malformed file mustn't fail the build
+		String content = new String(Files.readAllBytes(editorConfig.toPath()), StandardCharsets.UTF_8);
+		// the UTF-8 BOM is decoded as a character, and isn't removed by trim()
+		if (content.startsWith(UTF8_BOM)) {
+			content = content.substring(1);
+		}
+		for (String line : content.lines().toList()) {
+			String trimmed = line.trim();
+			if (trimmed.startsWith("[")) {
+				// `root` is only allowed in the preamble, before the first section
+				return false;
+			}
+			if (EDITOR_CONFIG_ROOT.matcher(trimmed.toLowerCase(Locale.ROOT)).matches()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private static final class State implements Serializable {
 		@Serial
-		private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID = 2L;
 		private final String version;
 		@Nullable private final Style style;
 		@Nullable private final KtfmtFormattingOptions options;
+		/**
+		 * Non-null when the {@code .editorconfig} support is enabled.
+		 */
+		@Nullable private final FileSignature editorConfigFiles;
 		private final JarState jarState;
 
 		State(String version,
 				JarState jarState,
 				@Nullable Style style,
-				@Nullable KtfmtFormattingOptions options) {
+				@Nullable KtfmtFormattingOptions options,
+				@Nullable FileSignature editorConfigFiles) {
 			this.version = version;
 			this.options = options;
 			this.style = style;
+			this.editorConfigFiles = editorConfigFiles;
 			this.jarState = jarState;
 			validateStyle();
 			validateOptions();
 		}
 
 		FormatterFunc createFormat() throws Exception {
-			final ClassLoader classLoader = jarState.getClassLoader();
+			final boolean enableEditorConfig = editorConfigFiles != null;
+			// ktfmt caches the parsed `.editorconfig` files statically, so a classloader is allocated per `.editorconfig` signature to pick up their changes.
+			final ClassLoader classLoader = enableEditorConfig
+					? jarState.getClassLoader(new ArrayList<>(List.of(jarState, editorConfigFiles)))
+					: jarState.getClassLoader();
 
 			if (isLegacyPackage(version)) {
-				return new KtfmtFormatterFuncCompat(version, style, options, classLoader).getFormatterFunc();
+				return new KtfmtFormatterFuncCompat(version, style, options, enableEditorConfig, classLoader).getFormatterFunc();
 			}
 
 			final Class<?> formatterFuncClass = classLoader.loadClass("com.diffplug.spotless.glue.ktfmt.KtfmtFormatterFunc");
@@ -273,13 +356,13 @@ public final class KtfmtStep implements Serializable {
 			final Class<?> ktfmtFormattingOptionsClass = classLoader.loadClass("com.diffplug.spotless.glue.ktfmt.KtfmtFormattingOptions");
 			final Class<?> ktfmtTrailingCommaManagmentStrategyClass = classLoader.loadClass("com.diffplug.spotless.glue.ktfmt.KtfmtTrailingCommaManagementStrategy");
 
-			if (style == null && options == null) {
+			if (style == null && options == null && !enableEditorConfig) {
 				final Constructor<?> constructor = formatterFuncClass.getConstructor();
 				return (FormatterFunc) constructor.newInstance();
 			}
 
-			final Object ktfmtStyle = style == null ? null : Enum.valueOf((Class<? extends Enum>) ktfmtStyleClass, getKtfmtStyleOption(style));
-			if (options == null) {
+			final Object ktfmtStyle = Enum.valueOf((Class<? extends Enum>) ktfmtStyleClass, getKtfmtStyleOption(style == null ? META : style));
+			if (options == null && !enableEditorConfig) {
 				final Constructor<?> constructor = formatterFuncClass.getConstructor(ktfmtStyleClass);
 				return (FormatterFunc) constructor.newInstance(ktfmtStyle);
 			}
@@ -287,21 +370,26 @@ public final class KtfmtStep implements Serializable {
 			final Constructor<?> optionsConstructor = ktfmtFormattingOptionsClass.getConstructor(
 					Integer.class, Integer.class, Integer.class, Boolean.class, ktfmtTrailingCommaManagmentStrategyClass);
 
-			final Object ktfmtTrailingCommaManagementStrategy = options.trailingCommaManagementStrategy == null
-					? null
-					: Enum.valueOf((Class<? extends Enum>) ktfmtTrailingCommaManagmentStrategyClass, options.trailingCommaManagementStrategy.name());
-			final Object ktfmtFormattingOptions = optionsConstructor.newInstance(
-					options.maxWidth, options.blockIndent, options.continuationIndent, options.removeUnusedImports, ktfmtTrailingCommaManagementStrategy);
-			if (style == null) {
-				final Constructor<?> constructor = formatterFuncClass.getConstructor(ktfmtFormattingOptionsClass);
-				return (FormatterFunc) constructor.newInstance(ktfmtFormattingOptions);
+			Object ktfmtFormattingOptions = null;
+			if (options != null) {
+				final Object ktfmtTrailingCommaManagementStrategy = options.trailingCommaManagementStrategy == null
+						? null
+						: Enum.valueOf((Class<? extends Enum>) ktfmtTrailingCommaManagmentStrategyClass, options.trailingCommaManagementStrategy.name());
+				ktfmtFormattingOptions = optionsConstructor.newInstance(
+						options.maxWidth, options.blockIndent, options.continuationIndent, options.removeUnusedImports, ktfmtTrailingCommaManagementStrategy);
 			}
 
-			final Constructor<?> constructor = formatterFuncClass.getConstructor(ktfmtStyleClass, ktfmtFormattingOptionsClass);
-			return (FormatterFunc) constructor.newInstance(ktfmtStyle, ktfmtFormattingOptions);
+			final Constructor<?> constructor = formatterFuncClass.getConstructor(ktfmtStyleClass, ktfmtFormattingOptionsClass, boolean.class);
+			final FormatterFunc formatterFunc = (FormatterFunc) constructor.newInstance(ktfmtStyle, ktfmtFormattingOptions, enableEditorConfig);
+			// the `.editorconfig` files are resolved from the file's path, so reject the NO_FILE_SENTINEL
+			return enableEditorConfig ? (FormatterFunc.NeedsFile) formatterFunc::apply : formatterFunc;
 		}
 
 		private void validateOptions() {
+			if (editorConfigFiles != null && BadSemver.version(version) < BadSemver.version(0, 60)) {
+				throw new IllegalStateException("Ktfmt `.editorconfig` support is available from version 0.60 (current version: %s)".formatted(version));
+			}
+
 			if (BadSemver.version(version) < BadSemver.version(0, 11)) {
 				if (options != null) {
 					throw new IllegalStateException("Ktfmt formatting options supported for version 0.11 and later");
@@ -369,39 +457,57 @@ public final class KtfmtStep implements Serializable {
 		private final String version;
 		private final Style style;
 		private final KtfmtFormattingOptions options;
+		private final boolean enableEditorConfig;
 		private final ClassLoader classLoader;
 
-		public KtfmtFormatterFuncCompat(String currentVersion, @Nullable Style style, @Nullable KtfmtFormattingOptions options, ClassLoader classLoader) {
+		public KtfmtFormatterFuncCompat(String currentVersion, @Nullable Style style, @Nullable KtfmtFormattingOptions options, boolean enableEditorConfig, ClassLoader classLoader) {
 			this.version = currentVersion;
 			this.style = style;
 			this.options = options;
+			this.enableEditorConfig = enableEditorConfig;
 			this.classLoader = classLoader;
 		}
 
 		public FormatterFunc getFormatterFunc() {
+			if (enableEditorConfig) {
+				return (FormatterFunc.NeedsFile) (input, file) -> {
+					try {
+						return applyFormat(input, file);
+					} catch (InvocationTargetException e) {
+						throw ThrowingEx.unwrapCause(e);
+					}
+				};
+			}
 			return input -> {
 				try {
-					return applyFormat(input);
+					return applyFormat(input, null);
 				} catch (InvocationTargetException e) {
 					throw ThrowingEx.unwrapCause(e);
 				}
 			};
 		}
 
-		protected String applyFormat(String input) throws Exception {
+		protected String applyFormat(String input, @Nullable File file) throws Exception {
 			Class<?> formatterClass = getFormatterClazz();
-			if (style == null && options == null || style == DEFAULT) {
+			if (style == null && options == null && !enableEditorConfig || style == DEFAULT) {
 				Method formatterMethod = formatterClass.getMethod(FORMATTER_METHOD, String.class);
 				return (String) formatterMethod.invoke(formatterClass, input);
 			} else {
 				Method formatterMethod = formatterClass.getMethod(FORMATTER_METHOD, getFormattingOptionsClazz(), String.class);
-				Object formattingOptions = getCustomFormattingOptions(formatterClass);
+				Object formattingOptions = getCustomFormattingOptions(formatterClass, file);
 				return (String) formatterMethod.invoke(formatterClass, formattingOptions, input);
 			}
 		}
 
-		private Object getCustomFormattingOptions(Class<?> formatterClass) throws Exception {
+		private Object getCustomFormattingOptions(Class<?> formatterClass, @Nullable File file) throws Exception {
 			Object formattingOptions = getFormattingOptionsFromStyle(formatterClass);
+			if (enableEditorConfig && file != null) {
+				// The explicitly configured options below are applied on top of the ones resolved from `.editorconfig`.
+				Class<?> editorConfigResolverClass = classLoader.loadClass(PACKAGE + ".cli.EditorConfigResolver");
+				Object editorConfigResolver = editorConfigResolverClass.getField("INSTANCE").get(null);
+				formattingOptions = editorConfigResolverClass.getMethod("resolveFormattingOptions", File.class, getFormattingOptionsClazz())
+						.invoke(editorConfigResolver, file, formattingOptions);
+			}
 			Class<?> formattingOptionsClass = formattingOptions.getClass();
 
 			if (options != null) {

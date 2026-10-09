@@ -4,6 +4,10 @@ We adhere to the [keepachangelog](https://keepachangelog.com/en/1.0.0/) format (
 
 ## [Unreleased]
 
+### Added
+- Add `<enableEditorConfig>` to `ktfmt`. ([#3143](https://github.com/diffplug/spotless/pull/3143))  
+  Overrides the style with the `.editorconfig` properties supported by ktfmt `0.60+`, like its `--enable-editorconfig` flag.
+
 ## [3.10.4] - 2026-10-08
 
 ### Changes

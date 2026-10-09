@@ -586,8 +586,15 @@ Groovy-Eclipse formatting errors/warnings lead per default to a build failure. T
   <continuationIndent>8</continuationIndent> <!-- optional -->
   <removeUnusedImports>false</removeUnusedImports> <!-- optional -->
   <trailingCommaManagementStrategy>COMPLETE</trailingCommaManagementStrategy> <!-- optional -->
+  <enableEditorConfig>true</enableEditorConfig> <!-- optional, requires ktfmt 0.60+ -->
 </ktfmt>
 ```
+
+`enableEditorConfig` makes ktfmt read the `.editorconfig` files applying to each formatted file, like its
+[`--enable-editorconfig`](https://github.com/Kotlin/ktfmt#from-the-command-line) flag. The supported properties
+(`max_line_length`, `indent_size`, `ij_continuation_indent_size`, `ktfmt_trailing_comma_management_strategy`, ...) override
+the style, and the other options configured above take precedence over them. Changing only the `.editorconfig` files does not
+invalidate the [incremental up-to-date checking](#incremental-up-to-date-checking-and-formatting) index.
 
 <a name="applying-ktlint-to-kotlin-files"></a>
 
