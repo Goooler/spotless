@@ -1,0 +1,65 @@
+name: Bug Report
+description: Create a bug report to help us fix the issue
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report an issue! Please fill out the form below to help us diagnose and fix the problem.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary of problem
+      description: A clear and concise description of what the problem is and what you expected to happen.
+    validations:
+      required: true
+  - type: input
+    id: spotless-version
+    attributes:
+      label: Spotless version
+      placeholder: "e.g. 7.0.0.BETA4"
+    validations:
+      required: true
+  - type: input
+    id: build-tool-version
+    attributes:
+      label: Gradle or Maven version
+      placeholder: "e.g. Gradle 8.10.2 / Maven 3.9.9"
+    validations:
+      required: true
+  - type: input
+    id: os-version
+    attributes:
+      label: Operating system and version
+      placeholder: "e.g. macOS 14.6 / Ubuntu 22.04 / Windows 11"
+    validations:
+      required: false
+  - type: textarea
+    id: configuration
+    attributes:
+      label: Spotless configuration & reproduction repo
+      description: |
+        Please copy-paste your full Spotless configuration block(s), and a link to a public git repo that reproduces the problem if possible.
+      placeholder: |
+        spotless {
+          ...
+        }
+    validations:
+      required: true
+  - type: textarea
+    id: error-output
+    attributes:
+      label: Console errors / stacktrace
+      description: |
+        Please copy-paste the full content of any console errors emitted by `gradlew spotlessApply --stacktrace` / `gradlew spotlessCheck --stacktrace` (or Maven equivalents).
+      render: shell
+    validations:
+      required: false
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched existing issues to ensure this is not a duplicate.
+          required: false
